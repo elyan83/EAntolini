@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "jfkdtree.h"
-#include "kdtree.h"
+//#include "jfkdtree.h"
+//#include "kdtree.h"
 
 
 //how close the ration of the triangle have to be in order to find a peak
@@ -160,10 +160,10 @@ main(int argc, char *argv[]) {
   struct tms first_time, start_time, second_time;
   pix_t *pixel_array, *image, *stripe;
   double cpu_time_used, dumx, dumy;
-  struct kdtree *kd_triangle;
-  struct jkdtree *jkd, *jkd_peak, *jkd_cat;
-  struct jkdres *jres, *pix_res;
-  struct kdres *res;
+  //struct kdtree *kd_triangle;
+  //struct jkdtree *jkd, *jkd_peak, *jkd_cat;
+  //struct jkdres *jres, *pix_res;
+  //struct kdres *res;
   int i, j, k,npixel, nx, ny;
   double x, y, key[2], pix_key[2];
   pix_t *pix_ptr, *pix_done, *store_ptr, skylevel, peakthreshold, pixelnoisethreshold;
