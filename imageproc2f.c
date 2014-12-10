@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-//#include "jfkdtree.h"
+#include "jfkdtree.h"
 //#include "kdtree.h"
 
 
@@ -161,8 +161,8 @@ main(int argc, char *argv[]) {
   pix_t *pixel_array, *image, *stripe;
   double cpu_time_used, dumx, dumy;
   //struct kdtree *kd_triangle;
-  //struct jkdtree *jkd, *jkd_peak, *jkd_cat;
-  //struct jkdres *jres, *pix_res;
+  struct jkdtree *jkd, *jkd_peak, *jkd_cat;
+  struct jkdres *jres, *pix_res;
   //struct kdres *res;
   int i, j, k,npixel, nx, ny;
   double x, y, key[2], pix_key[2];
@@ -644,7 +644,7 @@ main(int argc, char *argv[]) {
             y_yp = pix_key[1]-key[1];
             x_xp2 = x_xp * x_xp;
             y_yp2 = y_yp * y_yp;
-            x_y  = (pix_key[0]-key[0])*(pix_key[1]-key[1]);*/
+            x_y  = (pix_key[0]-key[0])*(pix_key[1]-key[1]);
         
         
             printf("x-xp = %g \n",x_xp);
@@ -690,7 +690,7 @@ main(int argc, char *argv[]) {
       }
      // printf("%g %g %g \n",Size,stat1,stat2);
       
-      
+          
       
 
 
@@ -736,8 +736,9 @@ main(int argc, char *argv[]) {
       
     }*/
     /* go to the next peak */
-    //jkd_res_next( jres );
-  //}
+      jkd_res_next( jres );
+    }
+
 
   /* close the output files */
  /* fclose(FpeakMagValues);
