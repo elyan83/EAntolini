@@ -176,6 +176,7 @@ main(int argc, char *argv[]) {
     
   int readfimage( float **data, int *nx, int *ny, const char *filename );
 
+#if 0 
   times(&first_time);
     
   
@@ -282,6 +283,8 @@ main(int argc, char *argv[]) {
 
   printf("Build triangle catalogue %ld %g\n",(long) (second_time.tms_utime - first_time.tms_utime),cpu_time_used);*/
 
+#endif
+  
   /* here is where the image processing begins; */
   /* everything up to here is either for the simulation or */
   /* could be done beforehand */
@@ -464,6 +467,7 @@ main(int argc, char *argv[]) {
 
   printf("Build the tree %ld %g\n",(long) (second_time.tms_utime - first_time.tms_utime),cpu_time_used);
 
+#if 0
   /* now let's do the triangle matching to find what is the transformation between the peaks and the catalogue */
   //times(&first_time);
   
@@ -527,6 +531,7 @@ main(int argc, char *argv[]) {
   cpu_time_used = ((double) (second_time.tms_utime - first_time.tms_utime)) / sysconf(_SC_CLK_TCK);
 
   //printf("Triangle matching %ld %g\n",(long) (second_time.tms_utime - first_time.tms_utime),cpu_time_used);*/
+#endif
   
  
     /* now let's do the aperture photometry on each peak and see if there are all in the catalogue */
