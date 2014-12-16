@@ -26,16 +26,7 @@ import cfg
 #------------------------------------------------------------------------------
 # Implementation of Functions
 #
-'''
-def bubble_sort_cat(DistRa,DistDec,Flux):
-    
-    for i in range(len(Flux)):
-        for j in range(len(Flux)-1-i):
-            if Flux[j] < Flux[j+1]:
-                Flux[j], Flux[j+1] = Flux[j+1], Flux[j]
-                DistRa[j], DistRa[j+1] = DistRa[j+1], DistRa[j]
-                DistDec[j], DistDec[j+1] = DistDec[j+1], DistDec[j]
-'''
+
 
 def bubble_sort_cat(DistRa,DistDec,Flux):
     DistRa, DistDec, Flux = zip(*sorted(zip(DistRa, DistDec, Flux), reverse=True, key=lambda x: x[2]))
@@ -225,7 +216,9 @@ def main():
             f.write(nstars)
             f.writelines(text[1:])
             f.close()
-         
+        
+        
+        
         #Create PeakStatObj.txt from Imageproc2f.c with the transformed and sorted full catalog
 
         FilePeakImage = 'PeakStatObj.txt'
@@ -351,7 +344,7 @@ def main():
         plt.plot(X_Cat,Y_Cat,linestyle = 'none',marker = '^',c='blue', markersize = 2)
         savefig("/Users/Elisa/c/Files/CatImageOverlap.pdf")
         plt.show()
-
+        
 
 #------------------------------------------------------------------------------
 # Start program execution.
