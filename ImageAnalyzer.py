@@ -14,7 +14,10 @@ from sys import argv
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import host_subplot
 import math
+import fit
 import statistics as stat
+from scipy.optimize import curve_fit
+from scipy import asarray as ar,exp
 
 from optparse import OptionParser
 
@@ -82,6 +85,8 @@ def ExecuteCommandFileOut(Filename,command):
     return Exec
 
 
+def gaus(r,sigma):
+    return r*exp(-r**2/(2*sigma**2))
 
 
 #------------------------------------------------------------------------------
@@ -137,7 +142,6 @@ def main():
         # Image Transformed Coordinates
         X_Trans_Imge      = array('f')
         Y_Trans_Image     = array('f')
-        
         
 
         # Get the Center of the Image from the Header
@@ -224,7 +228,7 @@ def main():
         FilePeakImage = 'PeakStatObj.txt'
 
 
-        cmd = ["/Users/Elisa/c/imageproc2f "+FileFitsImage+" < "+SortedCat]
+        cmd = "/Users/Elisa/c/EAntolini/imageproc2f "+FileFitsImage
 
         ExecuteCommand(pso+FilePeakImage,cmd,True)
         print('\n')
@@ -317,13 +321,68 @@ def main():
             for line in fd:
                 dist.append(float(line.split()[5]))
 
-        col=[i for i in zip(dist)]
+        #col=[i for i in zip(dist)]
+        col=[i for i in dist]
         distances = sorted(col)
 
-        #for i in range(len(col)):
-            #print(distances[i])
+        #Fit with the cumulative distribution of the distances
 
-        # Generate the cumulative distribution of the distances
+
+
+        x = array('f')
+        y = array('f')
+        ygaus = array('f')
+        ygauscum = array('f')
+
+
+        n = len(distances)
+
+        #for for i in distances :
+        #x = distances
+        dist =  str(distances)
+        dist = dist.replace("[","")
+        dist = dist.replace("]","")
+        dist = dist.replace(" ","")
+        dist =  dist.split(',')
+
+
+        mean = 0.
+        sigma = 0.
+
+        for i in dist :
+            
+            x.append(float(i))
+
+        for i in range(len(x)):
+            
+            mean += x[i]
+            sigma += (x[i]**2)
+
+        mean  =  mean/n
+        sigma =  sigma/n
+    
+
+        #mean = sum(x)/n
+        #sigma = sum(x**2)/n
+
+        print mean
+        print sigma
+
+        # Gaussian Values r*exp(-r**2/2/sigma**2)
+
+        y = ((1-np.arange(len(distances)))/distances)*-1
+
+        for i in range(len(x)):
+            
+            ygaus.append(x[i]* math.exp(-(x[i ]- mean)**2/(2*(sigma**2))))
+            ygauscum.append(1.0 - ygaus[i])
+
+
+        #(xf, yf), params, err, chi = fit.fit(fit.gaus, x,y)
+
+        #print "N:    %.2f +/- %.3f" % (params[0], err[0])
+        #print "N:    %.2f +/- %.3f" % (params[1], err[1])
+        #print "N:    %.2f +/- %.3f" % (params[2], err[2])
 
 
         #evaluate the cumulative
@@ -333,8 +392,14 @@ def main():
         plt.figure(1)
         #plt.plot(distances, cumulative, c='blue')
         plt.plot(distances, np.arange(len(distances)), c='blue')
+        plt.plot(distances, y, c='red')
+        plt.plot(distances, ygaus, c='cyan')
+        plt.plot(distances, ygauscum, c='orange')
         savefig("/Users/Elisa/c/Files/DistanceDistribution.png")
         plt.show()
+
+
+
 
         # plot the Catalog and Image overlap in the same coordinate system
         plt.figure(2)
@@ -344,7 +409,9 @@ def main():
         plt.plot(X_Cat,Y_Cat,linestyle = 'none',marker = '^',c='blue', markersize = 2)
         savefig("/Users/Elisa/c/Files/CatImageOverlap.pdf")
         plt.show()
-        
+
+
+
 
 #------------------------------------------------------------------------------
 # Start program execution.
