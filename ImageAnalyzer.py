@@ -89,6 +89,13 @@ def gaus(r,sigma):
     return r*exp(-r**2/(2*sigma**2))
 
 
+def point_in_poly(vertices,x,y):
+    from matplotlib.path import Path as mpPath
+    
+    path = mpPath(vertices)
+    point = (x,y)
+    return path.contains_point(point)
+
 #------------------------------------------------------------------------------
 # main
 #
@@ -149,6 +156,10 @@ def main():
         prihdr = hdulist[0].header
         CenterRA  = prihdr['TCSRA']
         CenterDEC = prihdr['TCSDEC']
+        
+        #Get the Size Image
+        nx = prihdr['NAXIS1']
+        ny = prihdr['NAXIS2']
 
          # Generate the Catalog
         FileCatalog = FileFitsImage.replace('/Users/Elisa/c/RealImage/','')
@@ -315,86 +326,112 @@ def main():
 
         dist=array('f')
         distances=array('f')
-
-        with open(kd3+'Match') as fd:
-            fd.readline()
-            for line in fd:
-                dist.append(float(line.split()[5]))
-
-        #col=[i for i in zip(dist)]
-        col=[i for i in dist]
-        distances = sorted(col)
-
-        #Fit with the cumulative distribution of the distances
-
-
-
         x = array('f')
-        y = array('f')
-        ygaus = array('f')
-        ygauscum = array('f')
+
+        # Image Transformed Coordinates
+        X_Match_Image      = array('f')
+        Y_Match_Image      = array('f')
+        X_Match_Cat        = array('f')
+        Y_Match_Cat        = array('f')
+        X_Missing_Image    = array('f')
+        Y_Missing_Image    = array('f')
+        Cat_ok             = array('f')
+        box_image_x        = np.empty(4)
+        box_image_y        = np.empty(4)
 
 
-        n = len(distances)
 
-        #for for i in distances :
-        #x = distances
-        dist =  str(distances)
-        dist = dist.replace("[","")
-        dist = dist.replace("]","")
-        dist = dist.replace(" ","")
-        dist =  dist.split(',')
+        X_Match_Image,Y_Match_Image,distances,X_Match_Cat,Y_Match_Cat  = np.loadtxt(kd3+'Match',usecols=[0,1,5,6,7],unpack=True)
 
+        x = sorted(distances)
 
-        mean = 0.
-        sigma = 0.
-
-        for i in dist :
-            
-            x.append(float(i))
-
-        for i in range(len(x)):
-            
-            mean += x[i]
-            sigma += (x[i]**2)
-
-        mean  =  mean/n
-        sigma =  sigma/n
-    
-
-        #mean = sum(x)/n
-        #sigma = sum(x**2)/n
+        mean  = np.median(np.array(distances))
+        sigma = np.std(np.array(distances))
 
         print mean
         print sigma
 
-        # Gaussian Values r*exp(-r**2/2/sigma**2)
-
-        y = ((1-np.arange(len(distances)))/distances)*-1
-
-        for i in range(len(x)):
-            
-            ygaus.append(x[i]* math.exp(-(x[i ]- mean)**2/(2*(sigma**2))))
-            ygauscum.append(1.0 - ygaus[i])
 
 
-        #(xf, yf), params, err, chi = fit.fit(fit.gaus, x,y)
+        #Fit with the cumulative distribution of the distances
+        # 1-exp(-r^2/2/sigma^2) cumulative distribution, 0.5=exp(-r^2/2/sigma^2) r=1.34 solve for sigma and then calc for what r is exp(-r^2/2/sigma^2)=0.01
+        #  if r > 5 mean are the stars in the image and not in the catalogs -> Missin Stars (x,y of the Image)
 
-        #print "N:    %.2f +/- %.3f" % (params[0], err[0])
-        #print "N:    %.2f +/- %.3f" % (params[1], err[1])
-        #print "N:    %.2f +/- %.3f" % (params[2], err[2])
+        # Find the Missing Stars
 
+        FMissingStars = open("FMissingStars.txt", 'w')
+
+        for i in range(len(distances)) :
+            if distances[i] > mean*5 :
+                FMissingStars.write(str(X_Match_Image[i])+" "+str(Y_Match_Image[i])+"\n")
+                X_Missing_Image.append(X_Match_Image[i])
+                Y_Missing_Image.append(Y_Match_Image[i])
+
+        FMissingStars.close()
+
+        # Create the Box Image Size in the Catalog Coordinate Sytem
+        # Read Size form Image Header
+
+        # Obtain transformation parameters
+
+        fileHandle = open (kd3+TriangleOut,"r" )
+        lineList = fileHandle.readlines()
+        fileHandle.close()
+        lastline = lineList[len(lineList)-1]
+        lastline = lastline.split(" ")
+
+        for i in range(1,7):
+            lastline[i] = float(lastline[i])
+        #first Corner (0,0)
+
+    
+        box_image_x[0] = 0*lastline[1] + 0*lastline[2] + lastline[3]
+        box_image_y[0] = 0*lastline[4] + 0*lastline[5] + lastline[6]
+
+        #Second Corner (0,ny)
+        box_image_x[1] = 0*lastline[1] + ny*lastline[2] + lastline[3]
+        box_image_y[1] = 0*lastline[4] + ny*lastline[5] + lastline[6]
+
+        #Third Corner  (nx,ny)
+        box_image_x[2] = nx*lastline[1] + ny*lastline[2] + lastline[3]
+        box_image_y[2] = nx*lastline[4] + ny*lastline[5] + lastline[6]
+
+        #Fourth Corner (nx,0)
+        box_image_x[3] = nx*lastline[1] + 0*lastline[2] + lastline[3]
+        box_image_y[3] = nx*lastline[4] + 0*lastline[5] + lastline[6]
+
+
+        # Fill the vertices of the Box
+        vertices = [(box_image_x[0],box_image_y[0]),(box_image_x[1],box_image_y[1]),(box_image_x[2],box_image_y[2]),(box_image_x[3],box_image_y[3])]
+
+        # If the star Catalog is inside the Box Image I take the flux value
+
+        FMatchedStars = open("FMatchedStars.txt", 'w')
+
+        for i in range(len(X_Cat)):
+            inside = point_in_poly(vertices,X_Cat[i],Y_Cat[i])
+            if inside == 1 :
+                Cat_ok.append(- 20 - ((log10(Flux_Cat[i]))/0.4))
+                
+                # Find Stars in the Image inside the box closing to the star Catalog
+                
+                for j in range(len(X_Match_Cat)):
+                    if (X_Match_Cat[j] == X_Cat[i]) and (Y_Match_Cat[j] == Y_Cat[i]) :
+                        if distances[j] <= 5 * mean :
+                            FMatchedStars.write(str(X_Match_Image[j])+" "+str(Y_Match_Image[j])+"\n")
+
+        FMatchedStars.close()
+
+
+        y_Cat_ok = np.arange(len(Cat_ok))
 
         #evaluate the cumulative
-        cumulative = np.cumsum(distances)
+        #cumulative = np.cumsum(distances)
 
         # plot the cumulative function
         plt.figure(1)
         #plt.plot(distances, cumulative, c='blue')
-        plt.plot(distances, np.arange(len(distances)), c='blue')
-        plt.plot(distances, y, c='red')
-        plt.plot(distances, ygaus, c='cyan')
-        plt.plot(distances, ygauscum, c='orange')
+        plt.plot(x, np.arange(len(distances)), c='blue')
         savefig("/Users/Elisa/c/Files/DistanceDistribution.png")
         plt.show()
 
@@ -407,6 +444,9 @@ def main():
         plt.plot(X_Trans_Imge,Y_Trans_Image,linestyle = 'none',marker = 'o',c='red',markersize = 2.2)
         #Catalog
         plt.plot(X_Cat,Y_Cat,linestyle = 'none',marker = '^',c='blue', markersize = 2)
+        #Missing Stars from the Catalog
+        plt.plot(X_Missing_Image,Y_Missing_Image,linestyle = 'none',marker = 'x',c='green', markersize = 2.4)
+
         savefig("/Users/Elisa/c/Files/CatImageOverlap.pdf")
         plt.show()
 

@@ -688,6 +688,7 @@ main(int argc, char *argv[]) {
           Size =  (x2bar+y2bar);
           fprintf(FPeakStatObj, "%g %g %g %g %g %g %g %d \n",key[0],key[1],allpixel,top_pixel,Size,stat1,stat2,npixel);
       }
+        
      // printf("%g %g %g \n",Size,stat1,stat2);
       
           
@@ -743,6 +744,8 @@ main(int argc, char *argv[]) {
   /* close the output files */
  /* fclose(FpeakMagValues);
   fclose(FMissingStarsValues);*/
+    
+  fclose(FPeakStatObj);
 
   /* free the peak result list */
   //jkd_res_free(jres);
