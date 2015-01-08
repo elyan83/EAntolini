@@ -31,12 +31,12 @@ import cfg
 #
 
 
-def bubble_sort_cat(DistX,DistY,Flux,DistRA,DistDEC):
-    DistX, DistY, Flux, DistRA, DistDEC = zip(*sorted(zip(DistX, DistY, Flux, DistRA, DistDEC), reverse=True, key=lambda x: x[2]))
+def bubble_sort_cat(DistRa,DistDec,Flux):
+    DistRa, DistDec, Flux = zip(*sorted(zip(DistRa, DistDec, Flux), reverse=True, key=lambda x: x[2]))
     
-    return DistX, DistY, Flux, DistRA, DistDEC
+    return DistRa, DistDec, Flux
 
-def bubble_sort_image(DistRa,DistDec,Allpix,PeakVal,Size,Stat1,Stat2,Npixel):
+def bubble_sort_image(DistRa,DistDec,Allpix,PeakVal):
     
     for i in range(len(Allpix)):
         for j in range(len(Allpix)-1-i):
@@ -45,10 +45,6 @@ def bubble_sort_image(DistRa,DistDec,Allpix,PeakVal,Size,Stat1,Stat2,Npixel):
                 PeakVal[j],PeakVal[j+1]  = PeakVal[j+1],PeakVal[j]
                 DistRa[j], DistRa[j+1]   = DistRa[j+1], DistRa[j]
                 DistDec[j], DistDec[j+1] = DistDec[j+1],DistDec[j]
-                Size[j], Size[j+1] = Size[j+1],Size[j]
-                Stat1[j], Stat1[j+1] = Stat1[j+1],Stat1[j]
-                Stat2[j], Stat2[j+1] = Stat2[j+1],Stat2[j]
-                Npixel[j], Npixel[j+1] = Npixel[j+1],Npixel[j]
 
 def ExecuteCommand(Filename,command,out):
     
@@ -140,21 +136,15 @@ def main():
         pso = '/Users/Elisa/c/Files/'
         
         # Transformed Catalog Coordinates and Fluxes
-        X_Cat      = array('f')
-        Y_Cat      = array('f')
-        Flux_Cat   = array('f')
-        RA_Cat     = array('f')
-        DEC_Cat    = array('f')
+        X_Cat     = array('f')
+        Y_Cat     = array('f')
+        Flux_Cat  = array('f')
         
         # Image Coordinates and Fluxes
-        X_Imge       = array('f')
-        Y_Image      = array('f')
-        Flux_Image   = array('f')
-        Peak_Image   = array('f')
-        Size_Image   = array('f')
-        Stat1_Image  = array('f')
-        Stat2_Image  = array('f')
-        Npixel_Image = array('f')
+        X_Imge      = array('f')
+        Y_Image     = array('f')
+        Flux_Image  = array('f')
+        Peak_Image  = array('f')
         
         # Image Transformed Coordinates
         X_Trans_Imge      = array('f')
@@ -209,12 +199,9 @@ def main():
         # Sort the transformed Ctalog from brighter to fainter stars
 
 
-        #X_Cat,Y_Cat,Flux_Cat,RA_Cat,DEC_Cat = np.loadtxt(ctg+FileCatalogTrans,usecols=[0,1,2],dtype=[('f0',float),('f1',float),('f2',float)], unpack = True)
+        X_Cat,Y_Cat,Flux_Cat = np.loadtxt(ctg+FileCatalogTrans,usecols=[0,1,2],dtype=[('f0',float),('f1',float),('f2',float)], unpack = True)
 
-        X_Cat,Y_Cat,Flux_Cat,RA_Cat,DEC_Cat = np.loadtxt(ctg+FileCatalogTrans, unpack = True)
-
-
-        X_Cat,Y_Cat,Flux_Cat,RA_Cat,DEC_Cat = bubble_sort_cat(X_Cat,Y_Cat,Flux_Cat,RA_Cat,DEC_Cat)
+        X_Cat,Y_Cat,Flux_Cat = bubble_sort_cat(X_Cat,Y_Cat,Flux_Cat)
         
         SortedCat = ctg+FileCatalogTrans.replace('.cat','_sorted.cat')
 
@@ -223,7 +210,7 @@ def main():
             fCat = open( SortedCat, 'w')
     
             for j in range(len(Flux_Cat)):
-                fCat.write(str(X_Cat[j])+" "+str(Y_Cat[j])+" "+str(Flux_Cat[j])+" "+str(RA_Cat[j])+" "+str(DEC_Cat[j])+"\n")
+                fCat.write(str(X_Cat[j])+" "+str(Y_Cat[j])+" "+str(Flux_Cat[j])+"\n")
             
             print(SortedCat + " Has been created")
 
@@ -272,8 +259,8 @@ def main():
 
         # Sort the PeakStatObj.txt from brightest to fainter fluxes
 
-        X_Image,Y_Image,Flux_Image,Peak_Image,Size_Image,Stat1_Image,Stat2_Image,Npixel_Image = np.loadtxt(pso+FilePeakImage, unpack = True)
-        bubble_sort_image(X_Image,Y_Image,Flux_Image,Peak_Image,Size_Image,Stat1_Image,Stat2_Image,Npixel_Image)
+        X_Image,Y_Image,Flux_Image,Peak_Image = np.loadtxt(pso+FilePeakImage,usecols=[0,1,2,3],dtype=[('f0',float),('f1',float),('f2',float),('f3',float)], unpack = True)
+        bubble_sort_image(X_Image,Y_Image,Flux_Image,Peak_Image)
         SortedImage = pso+FilePeakImage.replace('.txt','Sorted.txt')
 
         if os.path.exists(SortedImage) == False :
@@ -282,7 +269,7 @@ def main():
     
             for j in range(len(Flux_Image)):
                 if Flux_Image[j] > (Peak_Image[j]*5):
-                    fImage.write(str(X_Image[j])+" "+str(Y_Image[j])+" "+str(Flux_Image[j])+" "+str(Peak_Image[j])+" "+str(Size_Image[j])+" "+str(Stat1_Image[j])+" "+str(Stat2_Image[j])+" "+str(Npixel_Image[j])+"\n")
+                    fImage.write(str(X_Image[j])+" "+str(Y_Image[j])+" "+str(Flux_Image[j])+"\n")
 
         # Generate Shortest Catalog for Triangle Process (first 200 Brightest Stars)
 
@@ -318,6 +305,7 @@ def main():
 
          # Create newfile with the output of triangle_kd
 
+        #cmd = ['/Users/Elisa/c/kd-match-0.3.0/transform',SortedImage,TriangleOut]
         cmd = ['/Users/Elisa/c/kd-match-0.3.0/transform',SortedImage]+Tasterism.split()
 
 
@@ -325,19 +313,7 @@ def main():
 
         #Load stars of the Image  in the same coordinate system of the catalog
 
-        X_Image,Y_Image,Flux_Image,Peak_Image,Size_Image,Stat1_Image,Stat2_Image,Npixel_Image = np.loadtxt(SortedImage, unpack = True)
         X_Trans_Imge,Y_Trans_Image= np.loadtxt(kd3+'Newfile',usecols=[0,1],dtype=[('f0',float),('f1',float)], unpack = True)
-
-        print len(X_Trans_Imge)
-        print len(X_Image)
-
-        #Write all Image Information in Newfile
-
-        fNewfile = open(kd3+'Newfile', 'w')
-        for j in range(len(Flux_Image)):
-            fNewfile.write(str(X_Trans_Imge[j])+" "+str(Y_Trans_Image[j])+" "+str(X_Image[j])+" "+str(Y_Image[j])+" "+str(Flux_Image[j])+" "+str(Peak_Image[j])+" "+str(Size_Image[j])+" "+str(Stat1_Image[j])+" "+str(Stat2_Image[j])+" "+str(Npixel_Image[j])+"\n")
-
-        fNewfile.close()
 
         # Create match file with the whole catalog
 
