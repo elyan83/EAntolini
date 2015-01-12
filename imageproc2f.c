@@ -572,7 +572,7 @@ main(int argc, char *argv[]) {
   FImageBox = fopen("/Users/Elisa/c/Files/FImageBox.txt", "w");
     
   // This file contains the information about the Pixels statistics of the objects in the image
-  FPeakStatObj = fopen("/Users/Elisa/c/Files/PeakStatObj.txt", "w");
+  FPeakStatObj = fopen("/Users/Elisa/c/EAntolini/ProductFiles/PeakStatObj.txt", "w");
     
 #endif
     
