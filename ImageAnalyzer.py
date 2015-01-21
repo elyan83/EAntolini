@@ -23,6 +23,8 @@ from optparse import OptionParser
 
 from subprocess import call
 
+import subprocess
+
 import cfg
 
 
@@ -57,9 +59,8 @@ def ExecuteCommand(Filename,command,out):
     if os.path.exists(Filename) == False :
         
         if out == False :
-            subproc = call(command)
+            call(command)
             Exec = True
-            #subproc.wait()
             print(Filename + " has been created")
         
         else :
@@ -164,7 +165,7 @@ def main():
         Npixel_Image = array('f')
         
         # Image Transformed Coordinates
-        X_Trans_Imge      = array('f')
+        X_Trans_Image     = array('f')
         Y_Trans_Image     = array('f')
         
 
@@ -177,6 +178,27 @@ def main():
         #Get the Size Image
         nx = prihdr['NAXIS1']
         ny = prihdr['NAXIS2']
+        
+        
+        
+        #Create PeakStatObj.txt from Imageproc2f.c with the transformed and sorted full catalog
+        
+        FilePeakImage = 'PeakStatObj.txt'
+        
+        #####Put this at the top -> and run sleepproc=subprocess.Popen(["/Users/Elisa/c/EAntolini/imageproc2f "+FileFitsImage"])
+        # sleepproc.wait() -> In the part of the program when I need to read PeakStatObject.txt
+        
+        if os.path.exists(FilePeakImage) == False :
+        
+            execWait = True
+            subproc = subprocess.Popen(["/Users/Elisa/c/EAntolini/imageproc2f", FileFitsImage])
+            
+            print('\n')
+        
+        else :
+            execWait = False
+        
+
 
          # Generate the Catalog
         FileCatalog = FileFitsImage.replace('/Users/Elisa/c/RealImage/','')
@@ -252,17 +274,12 @@ def main():
             f.writelines(text[1:])
             f.close()
         
+        if execWait == True:
+            
+            subproc.wait()
+
         
-        
-        #Create PeakStatObj.txt from Imageproc2f.c with the transformed and sorted full catalog
-
-        FilePeakImage = 'PeakStatObj.txt'
-
-
-        cmd = "/Users/Elisa/c/EAntolini/imageproc2f "+FileFitsImage
-
-        ExecuteCommand(prod_dir+FilePeakImage,cmd,True)
-        print('\n')
+        subproc.wait()
 
         #  Remove the number of stars in the transformed and sorted catalog (first row)
 
@@ -333,16 +350,16 @@ def main():
         #Load stars of the Image  in the same coordinate system of the catalog
 
         X_Image,Y_Image,Flux_Image,Peak_Image,Size_Image,Stat1_Image,Stat2_Image,Npixel_Image = np.loadtxt(SortedImage, unpack = True)
-        X_Trans_Imge,Y_Trans_Image= np.loadtxt(prod_dir+'Newfile',usecols=[0,1],dtype=[('f0',float),('f1',float)], unpack = True)
+        X_Trans_Image,Y_Trans_Image= np.loadtxt(prod_dir+'Newfile',usecols=[0,1],dtype=[('f0',float),('f1',float)], unpack = True)
 
-        print len(X_Trans_Imge)
+        print len(X_Trans_Image)
         print len(X_Image)
 
         #Write all Image Information in Newfile
 
         fNewfile = open(prod_dir+'Newfile', 'w')
-        for j in range(len(Flux_Image)):
-            fNewfile.write(str(X_Trans_Imge[j])+" "+str(Y_Trans_Image[j])+" "+str(X_Image[j])+" "+str(Y_Image[j])+" "+str(Flux_Image[j])+" "+str(Peak_Image[j])+" "+str(Size_Image[j])+" "+str(Stat1_Image[j])+" "+str(Stat2_Image[j])+" "+str(Npixel_Image[j])+"\n")
+        for j in range(len(X_Trans_Image)):
+            fNewfile.write(str(X_Trans_Image[j])+" "+str(Y_Trans_Image[j])+" "+str(X_Image[j])+" "+str(Y_Image[j])+" "+str(Flux_Image[j])+" "+str(Peak_Image[j])+" "+str(Size_Image[j])+" "+str(Stat1_Image[j])+" "+str(Stat2_Image[j])+" "+str(Npixel_Image[j])+"\n")
 
         fNewfile.close()
 
@@ -366,6 +383,13 @@ def main():
         X_Trans_Cat        = array('f')
         Y_Trans_Cat        = array('f')
         F_Trans_Cat        = array('f')
+
+        # Catalog Stars inside the box Image
+        X_All_Cat     = array('f')
+        Y_All_Cat     = array('f')
+        F_All_Cat     = array('f')
+        Ra_All_Cat    = array('f')
+        Dec_All_Cat   = array('f')
 
         # Catalog Stars inside the box Image
         X_Box_Cat    = array('f')
@@ -446,7 +470,9 @@ def main():
         # Fill the vertices of the Box
         vertices = [(box_image_x[0],box_image_y[0]),(box_image_x[1],box_image_y[1]),(box_image_x[2],box_image_y[2]),(box_image_x[3],box_image_y[3])]
 
+         #Load the Transformed and Sorted Catalog infromations
 
+        X_All_Cat,Y_All_Cat,F_All_Cat,Ra_All_Cat,Dec_All_Cat  = np.loadtxt(SortedCat,unpack=True)
 
         #Load matched infromations
         distances,X_Trans_Cat,Y_Trans_Cat,F_Trans_Cat  = np.loadtxt(kd3+'Match',usecols=[10,11,12,13],unpack=True)
@@ -464,27 +490,36 @@ def main():
         FMissingStars     = open(prod_dir+'FMissingStars.txt', 'w')
         FMatchedStars     = open(prod_dir+'FMatchedStars.txt', 'w')
 
+        #Generate the file which will contain all the Stars in Catalog inside the size Image
+
+        print(len(X_All_Cat))
+
+        for i in range(len(X_All_Cat)) :
+            inside = point_in_poly(vertices,X_All_Cat[i],Y_All_Cat[i])
+            
+            if inside == 1 :
+               
+                X_Box_Cat.append(X_All_Cat[i])
+                Y_Box_Cat.append(Y_All_Cat[i])
+                F_Box_Cat.append(F_All_Cat[i])
+                Mag_Box_Cat.append(- 20 - ((log10(F_All_Cat[i]))/0.4))
+                FCatStarsBoxImage.write(str(X_All_Cat[i])+" "+str(Y_All_Cat[i])+" "+str(F_All_Cat[i])+" "+str(- 20 - ((log10(F_All_Cat[i]))/0.4))+"\n")
+
+
 
         for i in range(len(distances)) :
             inside = point_in_poly(vertices,X_Trans_Cat[i],Y_Trans_Cat[i])
-            
              # If the star Catalog is inside the Box Image
             if inside == 1 :
                
-               #All the stars of the Catalog in the Box Image Size
-               
-                FCatStarsBoxImage.write(str(X_Trans_Cat[i])+" "+str(Y_Trans_Cat[i])+" "+str(F_Trans_Cat[i])+"\n")
-                X_Box_Cat.append(X_Trans_Cat[i])
-                Y_Box_Cat.append(Y_Trans_Cat[i])
-                F_Box_Cat.append(F_Trans_Cat[i])
                
                 #  if the distance betweend the star in the catalog and the star in the image is  > 5 * mean
                 if distances[i] > mean*5 :
                     
     
-                    # Find Stars in the Image far away to the star Catalog inside the box Image size
+                    # Find Stars in the Image far away from the star Catalog inside the box Image size
            
-                    X_Missing_Image.append(X_Trans_Imge[i])
+                    X_Missing_Image.append(X_Trans_Image[i])
                     Y_Missing_Image.append(Y_Trans_Image[i])
                     F_Missing_Image.append(Flux_Image[i])
                     Mag_Missing_Image.append(- 20 - ((log10(Flux_Image[i]))/0.4))
@@ -496,16 +531,16 @@ def main():
                     Y_Missing_Cat.append(Y_Trans_Cat[i])
                     F_Missing_Cat.append(F_Trans_Cat[i])
                 
-                    FMissingStars.write(str(X_Trans_Imge[i])+" "+str(Y_Trans_Image[i])+" "+str(Flux_Image[i])+" "+str(- 20 - ((log10(Flux_Image[i]))/0.4))+" "+str(Size_Image[i])+" "+str(Stat1_Image[i])+" "+str(Stat2_Image[i])+" "+str(X_Trans_Cat[i])+" "+str(Y_Trans_Cat[i])+" "+str(F_Trans_Cat[i])+" "+str(- 20 - ((log10(F_Trans_Cat[i]))/0.4))+"\n")
+                    FMissingStars.write(str(X_Trans_Image[i])+" "+str(Y_Trans_Image[i])+" "+str(Flux_Image[i])+" "+str(- 20 - ((log10(Flux_Image[i]))/0.4))+" "+str(Size_Image[i])+" "+str(Stat1_Image[i])+" "+str(Stat2_Image[i])+" "+str(X_Trans_Cat[i])+" "+str(Y_Trans_Cat[i])+" "+str(F_Trans_Cat[i])+" "+str(- 20 - ((log10(F_Trans_Cat[i]))/0.4))+"\n")
                     
                 
                 if distances[i] <= mean*5 :
                     
                  
-                    # Find Stars in the Image inside the box closing to the star Catalog
+                    # Find Stars in the Image inside the box closer to the stars in the Catalog
                     
                     
-                    X_Matched_Image.append(X_Trans_Imge[i])
+                    X_Matched_Image.append(X_Trans_Image[i])
                     Y_Matched_Image.append(Y_Trans_Image[i])
                     F_Matched_Image.append(Flux_Image[i])
                     Mag_Matched_Image.append(- 20 - ((log10(Flux_Image[i]))/0.4))
@@ -518,7 +553,7 @@ def main():
                     F_Matched_Cat.append(F_Trans_Cat[i])
                     Mag_Matched_Cat.append(- 20 - ((log10(F_Trans_Cat[i]))/0.4))
 
-                    FMatchedStars.write(str(X_Trans_Imge[i])+" "+str(Y_Trans_Image[i])+" "+str(Flux_Image[i])+" "+str(- 20 - ((log10(Flux_Image[i]))/0.4))+" "+str(Size_Image[i])+" "+str(Stat1_Image[i])+" "+str(Stat2_Image[i])+" "+str(X_Trans_Cat[i])+" "+str(Y_Trans_Cat[i])+" "+str(F_Trans_Cat[i])+" "+str(- 20 - ((log10(F_Trans_Cat[i]))/0.4))+"\n")
+                    FMatchedStars.write(str(X_Trans_Image[i])+" "+str(Y_Trans_Image[i])+" "+str(Flux_Image[i])+" "+str(- 20 - ((log10(Flux_Image[i]))/0.4))+" "+str(Size_Image[i])+" "+str(Stat1_Image[i])+" "+str(Stat2_Image[i])+" "+str(X_Trans_Cat[i])+" "+str(Y_Trans_Cat[i])+" "+str(F_Trans_Cat[i])+" "+str(- 20 - ((log10(F_Trans_Cat[i]))/0.4))+"\n")
 
 
 
@@ -527,23 +562,22 @@ def main():
         FCatStarsBoxImage.close()
 
 
-
-
-        if len(Size_Missing_Image) > len(Size_Matched_Image):
-            lenDivide = int(len(Size_Missing_Image)/len(Size_Matched_Image))
-        else :
-            lenDivide = int(len(Size_Matched_Image)/len(Size_Missing_Image))
-
-
-
         lenPoint = 0
         count = 0
 
+          # Make binning with 50 stars for bin
+        lenDivide = 50
+        count2  = 0
+
 
         Mag_Mean_Val = 0
+        Std_Mag_Mean_Val = 0
         Size_Mean_Val = 0
+        Std_Size_Mean_Val = 0
         Stat1_Mean_Val = 0
+        Std_Stat1_Mean_Val = 0
         Stat2_Mean_Val = 0
+        Std_Stat2_Mean_Val = 0
 
         Mag_Mean   = array('f')
         Mag_Dev    = array('f')
@@ -554,18 +588,27 @@ def main():
         Stat2_Mean = array('f')
         Stat2_Dev  = array('f')
 
+        '''
+        j=range(0,len(Mag_Matched_Image))
+
+        Mag_Vec = Mag_Matched_Image[j>lenPoint and j<lenPoint+lenDivide]
+        lenPoint = lenPoint+lenDivide
+        print(Mag_Vec)
 
 
+        Mag_Mean.append(np.mean(Mag_Vec))
+        Mag_Std.append(np.std(Mag_Vec)
+        '''
 
+        #Computing Mean and Standard Deviation for Magnitude, Size, Stat1 and Stat2 Matched Image stars
 
-        #while(lenPoint < (len(Mag_Matched_Image_Sorted))) :
-        for j in range(0, len(Mag_Matched_Image_Sorted)):
+        for j in range(0, len(Mag_Matched_Image)):
             
                 if(j < (lenPoint+lenDivide)) :
                     
                     count = count +1
                     
-                    Mag_Mean_Val   += Mag_Matched_Image_Sorted[j]
+                    Mag_Mean_Val   += Mag_Matched_Image[j]
                     Size_Mean_Val  += Size_Matched_Image[j]
                     Stat1_Mean_Val += Stat1_Matched_Image[j]
                     Stat2_Mean_Val += Stat2_Matched_Image[j]
@@ -574,7 +617,6 @@ def main():
                 elif(j ==  (lenPoint+lenDivide)):
               
                     Mag_Mean.append(Mag_Mean_Val/count)
-                  
                     Mag_Mean_Val = 0
                     Size_Mean.append(Size_Mean_Val/count)
                     Size_Mean_Val = 0
@@ -582,35 +624,49 @@ def main():
                     Stat1_Mean_Val = 0
                     Stat2_Mean.append(Stat2_Mean_Val/count)
                     Stat2_Mean_Val = 0
+                    
+                    
+                    for k in range(lenPoint, (lenPoint+lenDivide)):
+                        Std_Mag_Mean_Val   += math.pow((Mag_Matched_Image[k] -  Mag_Mean[count2]),2)
+                        Std_Size_Mean_Val  += math.pow((Size_Matched_Image[k] - Size_Mean[count2]),2)
+                        Std_Stat1_Mean_Val += math.pow((Stat1_Matched_Image[k] - Stat1_Mean[count2]),2)
+                        Std_Stat2_Mean_Val += math.pow((Stat2_Matched_Image[k] - Stat2_Mean[count2]),2)
+                    
+                    
+                    Mag_Dev.append(math.sqrt(Std_Mag_Mean_Val/count))
+                    Size_Dev.append(math.sqrt(Std_Size_Mean_Val/count))
+                    Stat1_Dev.append(math.sqrt(Std_Stat1_Mean_Val/count))
+                    Stat2_Dev.append(math.sqrt(Std_Stat2_Mean_Val/count))
+
+                    Std_Mag_Mean_Val   = 0
+                    Std_Size_Mean_Val  = 0
+                    Std_Stat1_Mean_Val = 0
+                    Std_Stat2_Mean_Val = 0
+
+                    count2 = count2+1
                                       
                     lenPoint = j
                     count = 0
+                        
+       
 
+                       
+        
         # Compute the Mean and standard deviation of Size, Stat1, Stat2 for the Missing Stars
-
-        Mag_Dev.append(np.std(Mag_Mean))
-
 
         # Magnitude and Size Interpolation
         Mag_Size = np.interp(Mag_Mean, Mag_Mean,Size_Mean)
-        Size_Dev.append(np.std(Size_Mean))
-        #print Mag_Size
-        
+
         # Magnitude and Stat1 Interpolation
         Mag_Stat1 = np.interp(Mag_Mean, Mag_Mean,Stat1_Mean)
-        Stat1_Dev.append(np.std(Stat1_Mean))
-        #print Mag_Stat1
-
+     
         # Magnitude and Stat2 Interpolation
-        Mag_Stat2 = np.interp(Mag_Mean, Mag_Mean,Stat1_Mean)
-        Stat2_Dev.append(np.std(Stat2_Mean))
-        #print Mag_Stat2
+        Mag_Stat2 = np.interp(Mag_Mean, Mag_Mean,Stat2_Mean)
+ 
 
 
         Interp_Par = np.interp(Mag_Missing_Image,Mag_Mean,Mag_Size)
-
-        # See if the No-matched stars are star-like objects
-
+   
 
         Size_Goodness =  (Size_Missing_Image  - np.interp(Mag_Missing_Image, Mag_Mean,Mag_Size))/np.interp(Mag_Missing_Image, Mag_Mean,Size_Dev)
         Stat1_Goodness = (Stat1_Missing_Image - np.interp(Mag_Missing_Image, Mag_Mean,Mag_Stat1))/np.interp(Mag_Missing_Image, Mag_Mean,Stat1_Dev)
@@ -618,11 +674,9 @@ def main():
 
 
 
-        #Create a file
-
         # y_Cat_ok = np.arange(len(Cat_ok))
 
-  
+
         # plot the cumulative function
         plt.figure(1)
         plt.plot(x, np.arange(len(distances)), c='blue')
@@ -634,7 +688,7 @@ def main():
         # plot the Catalog and Image overlap in the same coordinate system
         plt.figure(2)
         #Image
-        plt.plot(X_Trans_Imge,Y_Trans_Image,linestyle = 'none',marker = 'o',c='red',markersize = 2.2)
+        plt.plot(X_Trans_Image,Y_Trans_Image,linestyle = 'none',marker = 'o',c='red',markersize = 2.2)
         #Catalog
         plt.plot(X_Cat,Y_Cat,linestyle = 'none',marker = '^',c='blue', markersize = 2)
         #Missing Stars from the Catalog
@@ -650,15 +704,17 @@ def main():
         host.set_xlabel("Magnitude")
         host.set_ylabel("Goodness")
         plt.gca().invert_xaxis()
-        plt.scatter(Miss_Mag, Size_Goodness, marker = 'o', color = 'g')
-        plt.scatter(Miss_Mag, Stat1_Goodness, marker = 'o', color = 'r')
-        plt.scatter(Miss_Mag, Stat2_Goodness, marker = 'o', color = 'b')
+        plt.scatter(Mag_Missing_Image, Size_Goodness, marker = 'o', color = 'g')
+        plt.scatter(Mag_Missing_Image, Stat1_Goodness, marker = 'o', color = 'r')
+        plt.scatter(Mag_Missing_Image, Stat2_Goodness, marker = 'o', color = 'b')
         #plt.errorbar(Star_Size_Mean,Mag_Image_Sorted_Mean,xerr = Star_Size_StDev,yerr = Mag_Image_Sorted_StDev, marker = 'o', color = 'g', linestyle = "None")
         plt.title("Statistical Analysis")
         grid(False)
         savefig(prod_dir+"Goodness.png")
         plt.legend( loc='lower left')
         plt.show()
+        
+
 
 #------------------------------------------------------------------------------
 # Start program execution.
