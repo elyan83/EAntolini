@@ -636,7 +636,7 @@ main(int argc, char *argv[]) {
             npixel++;
             jkd_res_next( pix_res );
         
-            printf("%g \n",allpixel);
+            //printf("%g \n",allpixel);
     
       /* Compute the Statistics */
         
@@ -647,8 +647,8 @@ main(int argc, char *argv[]) {
             x_y  = (pix_key[0]-key[0])*(pix_key[1]-key[1]);
         
         
-            printf("x-xp = %g \n",x_xp);
-            printf("y-yp = %g \n",y_yp);
+            //printf("x-xp = %g \n",x_xp);
+            //printf("y-yp = %g \n",y_yp);
             
             SumX  += x_xp*flux;
             SumX2 += flux*x_xp2;
@@ -765,6 +765,7 @@ main(int argc, char *argv[]) {
 
 
   /* I'm done! */
+  printf("Imageproc2f Done");
   return 0;
 
 }

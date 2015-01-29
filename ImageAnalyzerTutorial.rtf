@@ -1,0 +1,45 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf400
+{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;\f1\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red155\green44\blue1;\red110\green5\blue0;}
+\margl1440\margr1440\vieww25120\viewh11320\viewkind0
+\deftab720
+\pard\pardeftab720
+
+\f0\fs22 \cf0 \CocoaLigature0 ImageAnlyzer.py \
+\
+Usage : python ImageAnalyzer.py /Users/Elisa/c/RealImage/m48_12V-008.fits\
+\
+1) Get the coordinate of the center of the Image from the header fits file\
+2) Analyze the Image and create the statistical parameters -> 
+\f1\fs24 \CocoaLigature1 Create /Users/Elisa/c/EAntolini/ProductFiles/
+\f0\fs22 \CocoaLigature0 PeakStatObj.txt from Imageproc2f.c \
+2) Generate the Catalog  with the coordinate of the centre -> Create /ocs-1.6.2/catalogs/m48_12V-008.cat\
+3) Generate a copy of the Catalog without the stars numbers -> Create /Users/Elisa/c/EAntolini/ProductFiles/m48_12V-008.cat\
+4) Transform the RA and Dec columns of the catalog from Degrees to arcsec -> Create /Users/Elisa/c/EAntolini/ProductFiles/m48_12V-008_Transformed.cat\
+5) Sort the transformed Ctalog from brighter to fainter stars -> Create /Users/Elisa/c/EAntolini/ProductFiles/m48_12V-008_Transformed_sorted.cat\
+6) Sort the PeakStatObj.txt from brightest to fainter fluxes and take only object with high peak values -> Create /Users/Elisa/c/EAntolini/ProductFiles/PeakStatObjSorted.txt\
+7) Generate Shortest Catalog for Triangle Process (first 200 Brightest Stars) -> \
+									Create /Users/Elisa/c/EAntolini/ProductFiles/m48_12V-008_Transformed_sorted_200.cat\
+8)  Generate shortest PeakStatObj for Triangle Process (first 100 Brightest Stars) -> Create /Users/Elisa/c/EAntolini/ProductFiles/PeakStatObjSorted_100.txt\cf2 \
+\cf0 9) Find out the transformation rule between CCS and ICS and write the output to a file -> Create  /Users/Elisa/c/EAntolini/ProductFiles/TriangleOut.txt.The last row contains the parameters (a,b,c,d,e,f)for the coordinate transformation form the Image Coordinate System (x1, y1) to the Catalog Coordinate System (x2, y2) \
+10) Take the transformation Parameters from ICS to CCS\
+11) Compute the Image coordinate transformation from the ICS to the CCS -> Create /Users/Elisa/c/EAntolini/ProductFiles/Newfile \
+12) Compute the matching between the objects in the image and the objects in the whole catalog using the Catalog Coordinate System (CCS) -> Create /Users/Elisa/c/EAntolini/ProductFiles/Match\
+13) Create the Box Image Size in the Catalog Coordinate Sytem\
+14) Load the Transformed and Sorted full Catalog informations\
+15) Load informations from matching\
+16) Sort objects from shorter to further distances (11th column of Match)\
+17) Compute Mean and Sigma of the distances\
+18) Generate the file which will contain all the Stars in Catalog inside the size Image -> Create /Users/Elisa/c/EAntolini/ProductFiles/FCatStarsBoxImage.txt\
+19) Find Objects in the Image far away from the star Catalog inside the box Image size -> Create  /Users/Elisa/c/EAntolini/ProductFiles/FMissingObjects.txt\
+20)  Find Stars in the Image inside the box closer to the stars in the Catalog -> Create  /Users/Elisa/c/EAntolini/ProductFiles/FMatchedStars.txt\
+21) Computing Mean and Standard Deviation for Magnitude, Size, Stat1 and Stat2 Matched Image stars, binning every 50 stars.\
+22) Compute the Mean and standard deviation of Size, Stat1, Stat2 for all the Missing Objects using the statistical quantities of the Matched stars\
+23) Compute the Goodness of Size, Stat1, Stat2 for the Missing Objects -> Create /Users/Elisa/c/EAntolini/ProductFiles/FGoodnessAll.txt\
+24) Find potential Stars contained between the Missing Objects -> Create /Users/Elisa/c/EAntolini/ProductFiles/FGoodnessStars.txt\cf3 \
+\cf0 25) Plot the cumulative distribution of the distances \
+26) Plot the cumulative distribution of the Matched Stars (Image and Catalog) and of the Stars in the Catalog inside the box image\
+27) plot the Catalog and Image overlap in the same coordinate system\
+28) Plot Size_Goodness, Stat1_Goodness and Stat2_Goodness for all the Missing objects\
+29) Plot Size_Goodness, Stat1_Goodness and Stat2_Goodness for the Star-like objects candidates belonging to the Missing objects\
+}
