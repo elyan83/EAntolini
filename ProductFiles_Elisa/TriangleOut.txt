@@ -1,0 +1,64 @@
+x-transform: x2= -0.49699 x1 + 0.00757363 y1 + 504.021
+Number of matching triangle pairs: 1
+Triangle pair with matching x-transform: x2= -0.496961 x1 + 0.00767551 y1 + 503.671: { 25 12 39} -> { 20 13 167}
+x2 = -0.496967 x1 + 0.00768016 y1 + 503.68
+y2 = -0.00759805 x1 + -0.497026 y1 + 610.641
+ -t -0.496967 0.00768016 503.68 -0.00759805 -0.497026 610.641
+x-transform: x2= -0.49654 x1 + 0.00727251 y1 + 503.056
+Number of matching triangle pairs: 1
+Triangle pair with matching x-transform: x2= -0.496961 x1 + 0.00767551 y1 + 503.671: { 25 12 39} -> { 20 13 167}
+x2 = -0.496983 x1 + 0.00759888 y1 + 503.732
+y2 = -0.00745413 x1 + -0.496443 y1 + 608.889
+ -t -0.496983 0.00759888 503.732 -0.00745413 -0.496443 608.889
+x-transform: x2= -0.497407 x1 + 0.00789578 y1 + 503.856
+Number of matching triangle pairs: 2
+Triangle pair with matching x-transform: x2= -0.49699 x1 + 0.00757363 y1 + 504.021: { 79 41 25} -> { 116 46 20}
+Triangle pair with matching x-transform: x2= -0.496961 x1 + 0.00767551 y1 + 503.671: { 25 12 39} -> { 20 13 167}
+x2 = -0.496967 x1 + 0.00778099 y1 + 503.37
+y2 = -0.00758753 x1 + -0.496951 y1 + 610.388
+ -t -0.496967 0.00778099 503.37 -0.00758753 -0.496951 610.388
+x-transform: x2= -0.497066 x1 + 0.00701542 y1 + 503.624
+Number of matching triangle pairs: 4
+Triangle pair with matching x-transform: x2= -0.497407 x1 + 0.00789578 y1 + 503.856: { 53 27 59} -> { 63 29 102}
+Triangle pair with matching x-transform: x2= -0.49654 x1 + 0.00727251 y1 + 503.056: { 27 61 45} -> { 29 87 45}
+Triangle pair with matching x-transform: x2= -0.49699 x1 + 0.00757363 y1 + 504.021: { 79 41 25} -> { 116 46 20}
+Triangle pair with matching x-transform: x2= -0.496961 x1 + 0.00767551 y1 + 503.671: { 25 12 39} -> { 20 13 167}
+x2 = -0.496467 x1 + 0.00739077 y1 + 502.913
+y2 = -0.00787942 x1 + -0.496023 y1 + 608.985
+ -t -0.496467 0.00739077 502.913 -0.00787942 -0.496023 608.985
+x-transform: x2= -0.496605 x1 + 0.007686 y1 + 502.86
+Number of matching triangle pairs: 2
+Triangle pair with matching x-transform: x2= -0.49654 x1 + 0.00727251 y1 + 503.056: { 27 61 45} -> { 29 87 45}
+Triangle pair with matching x-transform: x2= -0.496961 x1 + 0.00767551 y1 + 503.671: { 25 12 39} -> { 20 13 167}
+x2 = -0.496815 x1 + 0.00770169 y1 + 503.157
+y2 = -0.00761376 x1 + -0.496536 y1 + 609.43
+ -t -0.496815 0.00770169 503.157 -0.00761376 -0.496536 609.43
+x-transform: x2= -0.495293 x1 + 0.00805518 y1 + 501.305
+Number of matching triangle pairs: 1
+Triangle pair with matching x-transform: x2= -0.495632 x1 + 0.00778921 y1 + 501.084: { 41 37 18} -> { 46 50 25}
+x2 = -0.495362 x1 + 0.00760173 y1 + 501.567
+y2 = -0.00807673 x1 + -0.495689 y1 + 608.003
+ -t -0.495362 0.00760173 501.567 -0.00807673 -0.495689 608.003
+x-transform: x2= -0.496641 x1 + 0.00750819 y1 + 503.662
+Number of matching triangle pairs: 6
+Triangle pair with matching x-transform: x2= -0.496605 x1 + 0.007686 y1 + 502.86: { 64 42 65} -> { 164 54 100}
+Triangle pair with matching x-transform: x2= -0.497407 x1 + 0.00789578 y1 + 503.856: { 53 27 59} -> { 63 29 102}
+Triangle pair with matching x-transform: x2= -0.497066 x1 + 0.00701542 y1 + 503.624: { 74 38 56} -> { 173 44 65}
+Triangle pair with matching x-transform: x2= -0.49654 x1 + 0.00727251 y1 + 503.056: { 27 61 45} -> { 29 87 45}
+Triangle pair with matching x-transform: x2= -0.49699 x1 + 0.00757363 y1 + 504.021: { 79 41 25} -> { 116 46 20}
+Triangle pair with matching x-transform: x2= -0.496961 x1 + 0.00767551 y1 + 503.671: { 25 12 39} -> { 20 13 167}
+x2 = -0.496502 x1 + 0.00747799 y1 + 502.94
+y2 = -0.00782306 x1 + -0.496116 y1 + 609.017
+ -t -0.496502 0.00747799 502.94 -0.00782306 -0.496116 609.017
+x-transform: x2= -0.496431 x1 + 0.00759438 y1 + 503.174
+Number of matching triangle pairs: 5
+Triangle pair with matching x-transform: x2= -0.496605 x1 + 0.007686 y1 + 502.86: { 64 42 65} -> { 164 54 100}
+Triangle pair with matching x-transform: x2= -0.496641 x1 + 0.00750819 y1 + 503.662: { 59 49 58} -> { 102 66 78}
+Triangle pair with matching x-transform: x2= -0.497066 x1 + 0.00701542 y1 + 503.624: { 74 38 56} -> { 173 44 65}
+Triangle pair with matching x-transform: x2= -0.49654 x1 + 0.00727251 y1 + 503.056: { 27 61 45} -> { 29 87 45}
+Triangle pair with matching x-transform: x2= -0.496961 x1 + 0.00767551 y1 + 503.671: { 25 12 39} -> { 20 13 167}
+x2 = -0.496478 x1 + 0.00745497 y1 + 502.997
+y2 = -0.00783012 x1 + -0.496213 y1 + 609.322
+ -t -0.496478 0.00745497 502.997 -0.00783012 -0.496213 609.322
+Transformation that fits the most asterisms:
+-t -0.496502 0.00747799 502.94 -0.00782306 -0.496116 609.017

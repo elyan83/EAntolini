@@ -1,0 +1,8 @@
+import subprocess
+
+subprocess.call(["ls", "-l"])
+
+print("Sleeping for ten seconds.")
+subprocess.call(["sleep", "10"])
+print("I have just run the sleep command.")
+

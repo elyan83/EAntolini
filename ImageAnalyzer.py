@@ -14,14 +14,15 @@ from sys import argv
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import host_subplot
 import math
-import fit
-import statistics as stat
+# import fit
+# import statistics as stat
 from scipy.optimize import curve_fit
 from scipy import asarray as ar,exp
 import time
 from optparse import OptionParser
 from subprocess import call
 import subprocess
+sys.path.append('/ocs/modules')
 import cfg
 
 
@@ -77,9 +78,9 @@ def ExecuteCommandFileOut(Filename,command):
     
     if os.path.exists(Filename) == False :
         
-        myoutfile = open(Filename, 'w')
-        
-        call(command, stdout = myoutfile)
+        with open(Filename, 'w') as myoutfile:
+            call(command, stdout = myoutfile)
+
         Exec = True
         print(Filename+" has been created "+"\n")
 
@@ -326,7 +327,7 @@ def main():
 
         TriangleOut = 'TriangleOut.txt'
 
-        cmd = ['/Users/Elisa/c/kd-match-0.3.0/triangle_kd',SortedImage100,SortedCat200,'-x1','1','-y1','2','-x2','1','-y2','2']
+        cmd = [kd3+'triangle_kd',SortedImage100,SortedCat200,'-x1','1','-y1','2','-x2','1','-y2','2']
         ExecuteCommandFileOut(prod_dir+TriangleOut,cmd)
 
 
@@ -356,15 +357,14 @@ def main():
 
         #Compute the Image coordinate transformation from the Image Coordinate System to the Catalog Coordinate Syatem
 
-        fNewfile = open(prod_dir+'Newfile', 'w')
-        for j in range(len(X_Trans_Image)):
-            fNewfile.write(str(X_Trans_Image[j])+" "+str(Y_Trans_Image[j])+" "+str(X_Image[j])+" "+str(Y_Image[j])+" "+str(Flux_Image[j])+" "+str(Peak_Image[j])+" "+str(Size_Image[j])+" "+str(Stat1_Image[j])+" "+str(Stat2_Image[j])+" "+str(Npixel_Image[j])+"\n")
+        with  open(prod_dir+'Newfile', 'w') as fNewfile:
+            for j in range(len(X_Trans_Image)):
+                fNewfile.write(str(X_Trans_Image[j])+" "+str(Y_Trans_Image[j])+" "+str(X_Image[j])+" "+str(Y_Image[j])+" "+str(Flux_Image[j])+" "+str(Peak_Image[j])+" "+str(Size_Image[j])+" "+str(Stat1_Image[j])+" "+str(Stat2_Image[j])+" "+str(Npixel_Image[j])+"\n")
 
-        fNewfile.close()
 
         # Compute the matching between the objects in the image and the objects in the whole catalog using the Catalog Coordinate System (CCS)
 
-        cmd = ['/Users/Elisa/c/kd-match-0.3.0/match_kd',prod_dir+'Newfile',SortedCat,'-x2','1','-y2','2']
+        cmd = [kd3+'match_kd',prod_dir+'Newfile',SortedCat,'-x2','1','-y2','2']
 
         ExecuteCommandFileOut(prod_dir+'Match',cmd)
      
@@ -438,9 +438,8 @@ def main():
 
         # Obtain transformation parameters
 
-        fileHandle = open (prod_dir+TriangleOut,"r" )
-        lineList = fileHandle.readlines()
-        fileHandle.close()
+        with open (prod_dir+TriangleOut,"r" ) as fileHandle:
+            lineList = fileHandle.readlines()
         lastline = lineList[len(lineList)-1]
         lastline = lastline.split(" ")
 
@@ -686,7 +685,8 @@ def main():
 
 
 
-
+        FGoodnessStars.close()
+        FGoodnessAll.close()
 
         # Plot the cumulative distribution of the distances
         plt.figure(1)
