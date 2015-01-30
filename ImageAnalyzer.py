@@ -18,13 +18,10 @@ import fit
 import statistics as stat
 from scipy.optimize import curve_fit
 from scipy import asarray as ar,exp
-
+import time
 from optparse import OptionParser
-
 from subprocess import call
-
 import subprocess
-
 import cfg
 
 
@@ -61,14 +58,12 @@ def ExecuteCommand(Filename,command,out):
         if out == False :
             call(command)
             Exec = True
-            print(Filename + " has been created")
-            print('\n')
+            print(Filename + " has been created"+"\n")
         
         else :
             print(os.popen(command).read())
             Exec = True
-            print(Filename + " has been created")
-            print('\n')
+            print(Filename + " has been created"+"\n")
     else:
         
         Exec = False
@@ -86,14 +81,13 @@ def ExecuteCommandFileOut(Filename,command):
         
         call(command, stdout = myoutfile)
         Exec = True
-        print(Filename+" has been created ")
-        print('\n')
+        print(Filename+" has been created "+"\n")
+
     
     else:
         
         Exec = False
-        print(Filename + " already exists")
-        print('\n')
+        print(Filename + " already exists"+"\n")
     
     return Exec
 
@@ -113,6 +107,7 @@ def main():
     """
     This is the main routine.
     """
+    time1 = time.time()
     
     # Parse the command line.
     parser = OptionParser()
@@ -133,6 +128,7 @@ def main():
     
         # Image to Analyze - Give the full path
         FileFitsImage  = args[0]
+       
         #fileImage = args[1]
         
         
@@ -146,8 +142,10 @@ def main():
         pso = '/Users/Elisa/c/Files/'
         
         # File Product Directory
-        
         prod_dir = '/Users/Elisa/c/EAntolini/ProductFiles/'
+        
+        # Base Directory
+        base_dir = '/Users/Elisa/c/EAntolini/'
         
         # Transformed Catalog Coordinates and Fluxes
         X_Cat      = array('f')
@@ -190,27 +188,41 @@ def main():
         
         if os.path.exists(FilePeakImage) == False :
         
+            cmd = base_dir+"imageproc2f"
+        
             execWait = True
-            subproc = subprocess.Popen(["/Users/Elisa/c/EAntolini/imageproc2f", FileFitsImage])
-            print(FilePeakImage + " Has Been Created")
-            print('\n')
+            subproc = subprocess.Popen([cmd, FileFitsImage])
+            print(FilePeakImage + " Has Been Created"+"\n")
+ 
         
         
         else :
             
             execWait = False
-            print(FilePeakImage + " already exists")
-            print('\n')
+            print(FilePeakImage + " already exists"+"\n")
 
 
 
          # Generate the Catalog
-         
-        FileCatalog = FileFitsImage.replace('/Users/Elisa/c/RealImage/','')
+
+
+        Remove = array('b')
+
+        for i in range(0,len(FileFitsImage)):
+            if FileFitsImage[i] == '/':
+                Remove.append(i)
+
+        stopRemove = Remove[len(Remove)-1]+1
+
+        FileCatalog = FileFitsImage.replace(FileFitsImage[Remove[0]:stopRemove],'')
+
         FileCatalog = FileCatalog.replace('.fits','.cat')
+
+
         
         cmd = ['python3','/ocs/commands/ourstars',str(CenterRA),str(CenterDEC),FileCatalog]
         ExecuteCommand(cfg.catalog_dir+FileCatalog,cmd,False)
+
 
 
 
@@ -226,7 +238,7 @@ def main():
             data = fin.read().splitlines(True)
             nstars = data[0]
        
-        print(" Number of Stars in the Catalog : "+ nstars)
+        print(" Number of Stars in the Catalog : "+ nstars+"\n")
         
         if ExecValue == True :
             with open(prod_dir+FileCatalog, 'w') as fout:
@@ -257,16 +269,15 @@ def main():
 
         if os.path.exists(SortedCat) == False :
     
-            fCat = open( SortedCat, 'w')
+            with open( SortedCat, 'w') as fCat:
+                for j in range(len(Flux_Cat)):
+                    fCat.write(str(X_Cat[j])+" "+str(Y_Cat[j])+" "+str(Flux_Cat[j])+" "+str(RA_Cat[j])+" "+str(DEC_Cat[j])+"\n")
     
-            for j in range(len(Flux_Cat)):
-                fCat.write(str(X_Cat[j])+" "+str(Y_Cat[j])+" "+str(Flux_Cat[j])+" "+str(RA_Cat[j])+" "+str(DEC_Cat[j])+"\n")
-            
-            print(SortedCat + " Has been created")
+            print(SortedCat + " Has been created"+"\n")
             print('\n')
 
         else :
-            print(SortedCat + " already exists")
+            print(SortedCat + " already exists"+"\n")
             print('\n')
 
 
@@ -274,7 +285,7 @@ def main():
         if execWait == True :
     
             subproc.wait()
-            
+
 
 
         # Sort the PeakStatObj.txt from brightest to fainter fluxes
@@ -285,11 +296,10 @@ def main():
 
         if os.path.exists(SortedImage) == False :
     
-            fImage = open(SortedImage, 'w')
-    
-            for j in range(len(Flux_Image)):
-                if Flux_Image[j] > (Peak_Image[j]*5):
-                    fImage.write(str(X_Image[j])+" "+str(Y_Image[j])+" "+str(Flux_Image[j])+" "+str(Peak_Image[j])+" "+str(Size_Image[j])+" "+str(Stat1_Image[j])+" "+str(Stat2_Image[j])+" "+str(Npixel_Image[j])+"\n")
+            with open(SortedImage, 'w') as fImage:
+                for j in range(len(Flux_Image)):
+                    if Flux_Image[j] > (Peak_Image[j]*5):
+                        fImage.write(str(X_Image[j])+" "+str(Y_Image[j])+" "+str(Flux_Image[j])+" "+str(Peak_Image[j])+" "+str(Size_Image[j])+" "+str(Stat1_Image[j])+" "+str(Stat2_Image[j])+" "+str(Npixel_Image[j])+"\n")
 
 
         # Generate Shortest Catalog for Triangle Process (first 200 Brightest Stars)
@@ -322,14 +332,14 @@ def main():
 
         #Take the transformation Parameters from ICS to CCS (-t parameter)
 
-        with open(kd3+TriangleOut, 'r') as fin:
+        with open(prod_dir+TriangleOut, 'r') as fin:
             data = fin.read().splitlines(True)
             Tasterism = data[len(data)-1]
 
 
          # Create newfile with the output of triangle_kd
 
-        cmd = ['/Users/Elisa/c/kd-match-0.3.0/transform',SortedImage]+Tasterism.split()
+        cmd = [kd3+'transform',SortedImage]+Tasterism.split()
 
 
         ExecuteCommandFileOut(prod_dir+'Newfile',cmd)
@@ -357,8 +367,7 @@ def main():
         cmd = ['/Users/Elisa/c/kd-match-0.3.0/match_kd',prod_dir+'Newfile',SortedCat,'-x2','1','-y2','2']
 
         ExecuteCommandFileOut(prod_dir+'Match',cmd)
-        '''
-        '''
+     
 
         ##########   IMAGE AND CATALOG MATCH INFROMATION ######################
 
@@ -464,7 +473,7 @@ def main():
         X_All_Cat,Y_All_Cat,F_All_Cat,Ra_All_Cat,Dec_All_Cat  = np.loadtxt(SortedCat,unpack=True)
 
         #Load matched infromations
-        distances,X_Trans_Cat,Y_Trans_Cat,F_Trans_Cat  = np.loadtxt(kd3+'Match',usecols=[10,11,12,13],unpack=True)
+        distances,X_Trans_Cat,Y_Trans_Cat,F_Trans_Cat  = np.loadtxt(prod_dir+'Match',usecols=[10,11,12,13],unpack=True)
     
         # Sort objects from shorter to further distances (11th column of Match)
         x = sorted(distances)
@@ -475,7 +484,7 @@ def main():
         mean  = np.median(np.array(distances))
         sigma = np.std(np.array(distances))
     
-        print("The Mean of the Distances between the stars in the catalog and the object in the image is :"+str(mean)+" +/- "+str(sigma))
+        print("The Mean of the Distances between the stars in the catalog and the object in the image is :"+str(mean)+" +/- "+str(sigma)+"\n")
 
         FCatStarsBoxImage = open(prod_dir+'FCatStarsBoxImage.txt', 'w')
         FMissingObjects     = open(prod_dir+'FMissingObjects.txt', 'w')
@@ -674,7 +683,8 @@ def main():
                         
                         
                         FGoodnessStars.write(str(X_Missing_Image[i])+" "+str(Y_Missing_Image[i])+" "+str(F_Missing_Image[i])+" "+str(Mag_Missing_Image[i])+" "+str(Size_Goodness[i])+" "+str(Stat1_Goodness[i])+" "+str(Stat2_Goodness[i])+"\n")
-                       
+
+
 
 
 
@@ -685,12 +695,10 @@ def main():
         host.set_ylabel("Number of Times")
         plt.plot(x, np.arange(len(distances)), c='blue')
         savefig(prod_dir+"DistanceDistribution.png")
-        plt.show()
+        #plt.show()
 
 
         # Plot the cumulative distribution of the Matched Stars (Image and Catalog) and of the Stars in the Catalog inside the box image
-
-        Mag_Box_Cat
 
         plt.figure(2)
         host = host_subplot(111)
@@ -699,9 +707,8 @@ def main():
         plt.plot(Mag_Box_Cat, np.arange(len(Mag_Box_Cat)), marker = '^',c='blue',markersize = 3, linestyle='None')
         plt.plot(Mag_Matched_Cat, np.arange(len(Mag_Matched_Cat)),marker = 'o', c='green',markersize = 3,linestyle='None')
         plt.plot(Mag_Matched_Image, np.arange(len(Mag_Matched_Image)),marker = 'o', c='red',markersize = 3,linestyle='None')
-        #plt.gca().invert_xaxis()
         savefig(prod_dir+"MagnitudesDistribution.png")
-        plt.show()
+        #plt.show()
 
 
 
@@ -715,7 +722,7 @@ def main():
         plt.plot(X_Missing_Image,Y_Missing_Image,linestyle = 'none',marker = 'x',c='green', markersize = 2.4)
 
         savefig(prod_dir+"CatImageOverlap.pdf")
-        plt.show()
+        #plt.show()
 
 
         # Plot Size_Goodness, Stat1_Goodness and Stat2_Goodness for all the Missing objects
@@ -732,7 +739,7 @@ def main():
         grid(False)
         savefig(prod_dir+"Goodness.png")
         plt.legend( loc='lower left')
-        plt.show()
+        #plt.show()
 
         #  Plot Size_Goodness, Stat1_Goodness and Stat2_Goodness for the Star-like objects candidates belonging to the Missing Stars
         plt.figure(5)
@@ -748,9 +755,12 @@ def main():
         grid(False)
         savefig(prod_dir+"PossibleStarsGoodness.png")
         plt.legend( loc='lower left')
-        plt.show()
+        #plt.show()
 
 
+        time2 = time.time()
+        duration = time2-time1
+        print("The script runs from start to finish in "+str(duration)+" seconds "+"\n")
 
 #------------------------------------------------------------------------------
 # Start program execution.
