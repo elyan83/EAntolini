@@ -556,6 +556,7 @@ def main():
 
 
 
+
         FMissingObjects.close()
         FMatchedStars.close()
         FCatStarsBoxImage.close()
@@ -705,7 +706,7 @@ def main():
         host.set_xlabel("Magnitude")
         host.set_ylabel("Number of Times")
         plt.plot(Mag_Box_Cat, np.arange(len(Mag_Box_Cat)), marker = '^',c='blue',markersize = 3, linestyle='None')
-        plt.plot(Mag_Matched_Cat, np.arange(len(Mag_Matched_Cat)),marker = 'o', c='green',markersize = 3,linestyle='None')
+        plt.plot(sorted(Mag_Matched_Cat), np.arange(len(Mag_Matched_Cat)),marker = 'o', c='green',markersize = 3,linestyle='None')
         plt.plot(Mag_Matched_Image, np.arange(len(Mag_Matched_Image)),marker = 'o', c='red',markersize = 3,linestyle='None')
         savefig(prod_dir+"MagnitudesDistribution.png")
         #plt.show()
