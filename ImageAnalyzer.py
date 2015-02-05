@@ -52,26 +52,47 @@ def bubble_sort_image(DistRa,DistDec,Allpix,PeakVal,Size,Stat1,Stat2,Npixel):
 
 
 
-def ExecuteCommand(Filename,command,out):
+def ExecuteCommand(Filename1,Filename2,command,out):
     
-    if os.path.exists(Filename) == False :
+    if Filename2 == None :
         
-        if out == False :
-            call(command)
-            Exec = True
-            print(Filename + " has been created"+"\n")
+        if os.path.exists(Filename1) == False :
         
-        else :
-            print(os.popen(command).read())
-            Exec = True
-            print(Filename + " has been created"+"\n")
-    else:
+            if out == False :
+                call(command)
+                Exec = True
+                print(Filename1 + " has been created"+"\n")
         
-        Exec = False
-        print(Filename + " already exists")
-        print('\n')
+            else :
+                print(os.popen(command).read())
+                Exec = True
+                print(Filename1 + " has been created"+"\n")
+        else:
+        
+            Exec = False
+            print(Filename1 + " already exists"+"\n")
+            print('\n')
+
+    else :
+         if os.path.exists(Filename1) == False or os.path.exists(Filename2) == False:
+             
+             if out == False :
+                 call(command)
+                 Exec = True
+             
+             else :
+                 print(os.popen(command).read())
+                 Exec = True
+         else:
+                         
+            Exec = False
+            print(Filename1+" and "+Filename2+ " already exists"+"\n")
+
+
 
     return Exec
+
+
 
 def ExecuteCommandFileOut(Filename,command):
     
@@ -148,6 +169,10 @@ def main():
         # Base Directory
         base_dir = '/Users/Elisa/c/EAntolini/'
         
+        #FITS Dir
+        
+        fits_dir = '/Users/Elisa/c/EAntolini/AstrometryFITS/'
+        
         # Transformed Catalog Coordinates and Fluxes
         X_Cat      = array('f')
         Y_Cat      = array('f')
@@ -222,7 +247,7 @@ def main():
 
         
         cmd = ['python3','/ocs/commands/ourstars',str(CenterRA),str(CenterDEC),FileCatalog]
-        ExecuteCommand(cfg.catalog_dir+FileCatalog,cmd,False)
+        ExecuteCommand(cfg.catalog_dir+FileCatalog,None,cmd,False)
 
 
 
@@ -230,7 +255,7 @@ def main():
         # Generate a Copy of the Catalog removing the first row
         
         cmd = ['cp',cfg.catalog_dir+FileCatalog,prod_dir]
-        ExecValue = ExecuteCommand(prod_dir+FileCatalog,cmd,False)
+        ExecValue = ExecuteCommand(prod_dir+FileCatalog,None,cmd,False)
 
 
         # Read nstars from the original Catalog
@@ -762,6 +787,13 @@ def main():
         time2 = time.time()
         duration = time2-time1
         print("The script runs from start to finish in "+str(duration)+" seconds "+"\n")
+
+        #Create FITS files with Astrometric Information
+
+        cmd = 'python '+fits_dir+'AstrometryFITS.py '+FileFitsImage
+
+        ExecuteCommand(prod_dir+'new-image.fits',prod_dir+'wcs.fits',cmd,True)
+
 
 #------------------------------------------------------------------------------
 # Start program execution.
