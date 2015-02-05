@@ -784,15 +784,15 @@ def main():
         #plt.show()
 
 
-        time2 = time.time()
-        duration = time2-time1
-        print("The script runs from start to finish in "+str(duration)+" seconds "+"\n")
-
         #Create FITS files with Astrometric Information
 
         cmd = 'python '+fits_dir+'AstrometryFITS.py '+FileFitsImage
 
         ExecuteCommand(prod_dir+'new-image.fits',prod_dir+'wcs.fits',cmd,True)
+
+        time2 = time.time()
+        duration = time2-time1
+        print("The script runs from start to finish in "+str(duration)+" seconds "+"\n")
 
 
 #------------------------------------------------------------------------------

@@ -20,8 +20,6 @@ def CreateNewImage(Self,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Date):
     #EXTEND Generates an error
     del Self['EXTEND']
     
-    #Self.insert(9,('EXTEND', 'T', 'FITS dataset may contain extensions')) -> This Generate an Error
-    
  
     # RA and DEC reference Points
  
