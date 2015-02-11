@@ -33,8 +33,8 @@ def CreateNewImage(Self,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Date):
  
     # Units
  
-    Self.append(('CUNIT1', 'Deg','X pixel scale units '),end=True)
-    Self.append(('CUNIT2', 'Deg','Y pixel scale units '),end=True)
+    Self.append(('CUNIT1', 'deg','X pixel scale units '),end=True)
+    Self.append(('CUNIT2', 'deg','Y pixel scale units '),end=True)
  
     # Transformation Matrix
  
@@ -69,8 +69,8 @@ def CreateWCS(Self,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Date):
 
     # Units
 
-    Self.header['CUNIT1'] = 'Deg','X pixel scale units '
-    Self.header['CUNIT2'] = 'Deg','Y pixel scale units '
+    Self.header['CUNIT1'] = 'deg','X pixel scale units '
+    Self.header['CUNIT2'] = 'deg','Y pixel scale units '
 
     # Transformation Matrix
 
@@ -139,10 +139,11 @@ def main():
 
 
         # Access to the Header of the FITS Image
-
+        
+        
         hdulist = pyfits.open(FileFitsImage)
         prihdr  = hdulist[0].header
-
+        
 
         # Get the Center of the Image from the Header and add the Reference Point (deg)
 
@@ -173,6 +174,7 @@ def main():
 
         #Write the FitsFiles
         
+        
         if os.path.exists(prod_dir+'new-image.fits') == False :
             
             hdulist.writeto(prod_dir+'new-image.fits')
@@ -181,6 +183,7 @@ def main():
         else :
         
             print(prod_dir+'new-image.fits' + " already exists"+"\n")
+        
         
         if os.path.exists(prod_dir+'wcs.fits') == False :
             

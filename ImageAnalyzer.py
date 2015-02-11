@@ -122,6 +122,132 @@ def point_in_poly(vertices,x,y):
     point = (x,y)
     return path.contains_point(point)
 
+
+
+def CreateWCS(Self,Dir,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Nx,Ny,Date):
+    
+    Self.header['WCSAXES'] = 2,' '
+    
+    Self.header['CTYPE1'] = 'RA---TAN-SIP','TAN (gnomic) projection + SIP distortions'
+    Self.header['CTYPE2'] = 'DEC---TAN-SIP','TAN (gnomic) projection + SIP distortions'
+    Self.header['EQUINOX'] = 2000.0,'Equatorial coordinates definition (yr)'
+    
+    Self.header['LONPOLE'] = 180.0,' '
+    Self.header['LATPOLE'] = 0.0,' '
+    
+    
+    
+    
+    # RA and DEC reference Points
+    
+    Self.header['CRVAL1'] = cenVAL1,'RA  of reference point'
+    Self.header['CRVAL2'] = cenVAL2,'DEC  of reference point'
+    
+    # Pixels Reference Points
+    
+    Self.header['CRPIX1'] = cenPIX1,'X reference pixel'
+    Self.header['CRPIX2'] = cenPIX2,'Y reference pixel'
+    
+    # Units
+    
+    Self.header['CUNIT1'] = 'deg','X pixel scale units '
+    Self.header['CUNIT2'] = 'deg','Y pixel scale units '
+    
+    # Transformation Matrix
+    
+    Self.header['CD1_1'] = a,'Transformation matrix'
+    Self.header['CD1_2'] = b,' '
+    Self.header['CD2_1'] = d,' '
+    Self.header['CD2_2'] = e,' '
+    
+    # Additional Constants of the Transformation Matrix
+    #Self.header['CD1_3'] = c,'Additional Constants'
+    #Self.header['CD2_3'] = f,' '
+    
+    Self.header['IMAGEW'] = Nx,'Image width,  in pixels'
+    Self.header['IMAGEH'] = Ny,'Image height, in pixels.'
+    
+    # Date
+    Self.header['DATE'] = Date,'Date this file was created.'
+    
+    if os.path.exists(Dir+'wcs.fits') == False :
+        
+        Self.writeto(Dir+'wcs.fits')
+        
+        print(Dir+'wcs.fits' + " has been created"+"\n")
+            
+    else :
+                
+        print(Dir+'wcs.fits' + " already exists"+"\n")
+    
+    return Self
+
+def CreateNewImage(Self,hlist,Dir,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Nx,Ny,Date):
+    
+    #EXTEND Generates an error
+    del Self['EXTEND']
+    
+    Self.append(('WCSAXES',2,' '),end=True)
+    
+    Self.append(('CTYPE1','RA---TAN-SIP','TAN (gnomic) projection + SIP distortions'),end=True)
+    Self.append(('CTYPE2','DEC---TAN-SIP','TAN (gnomic) projection + SIP distortions'),end=True)
+    Self.append(('EQUINOX', 2000.0,'Equatorial coordinates definition (yr)'),end=True)
+    
+    Self.append(('LONPOLE',180.0,' '),end=True)
+    Self.append(('LATPOLE',0.0,' '),end=True)
+    
+
+    
+    
+    # RA and DEC reference Points
+    
+    Self.append(('CRVAL1', cenVAL1, 'RA  of reference point'),end=True)
+    Self.append(('CRVAL2', cenVAL2, 'DEC  of reference point'),end=True)
+    
+    # Pixels Reference Points
+    
+    Self.append(('CRPIX1', cenPIX1, 'X reference pixel'),end=True)
+    Self.append(('CRPIX2', cenPIX2, 'Y reference pixel'),end=True)
+    
+    # Units
+    
+    Self.append(('CUNIT1', 'deg','X pixel scale units '),end=True)
+    Self.append(('CUNIT2', 'deg','Y pixel scale units '),end=True)
+    
+    # Transformation Matrix
+    
+    Self.append(('CD1_1',a,'Transformation matrix'),end=True)
+    Self.append(('CD1_2',b,' '),end=True)
+    Self.append(('CD2_1',d,' '),end=True)
+    Self.append(('CD2_2',e,' '),end=True)
+    
+    # Additional Constants of the Transformation Matrix
+    
+    #Self.append(('CD1_3',c,'Additional Constants'),end=True)
+    #Self.append(('CD2_3',f,' '),end=True)
+                
+    Self.append(('IMAGEW',Nx,'Image width,  in pixels'),end=True)
+    Self.append(('IMAGEH',Ny,'Image height, in pixels.'),end=True)
+    
+    # Date
+    
+    Self.append(('DATE', Date,'Date this file was created.'),end=True)
+    
+                
+    if os.path.exists(Dir+'new-image.fits') == False :
+                
+         hlist.writeto(Dir+'new-image.fits')
+         
+         print(Dir+'new-image.fits' + " has been created"+"\n")
+                
+    else :
+                
+        print(Dir+'new-image.fits' + " already exists"+"\n")
+    
+    return Self
+
+
+
 #------------------------------------------------------------------------------
 # main
 #
@@ -786,9 +912,49 @@ def main():
 
         #Create FITS files with Astrometric Information
 
+
+        # Create WCS File from scratch
+        # Create the standard Header of the fits file
+
+
+
+        # Transform Reference Point from ICS to CCS
+
+        CRVAL1 =  (cfg.ccd_field_centre[0]*lastline[1] + cfg.ccd_field_centre[1]*lastline[2] + lastline[3])/3600
+        CRVAL2 =  (cfg.ccd_field_centre[0]*lastline[4] + cfg.ccd_field_centre[1]*lastline[5] + lastline[6])/3600
+
+        CentRA = (CenterRA*15) + CRVAL1
+        CentDEC = CenterDEC + CRVAL2
+
+        # Compute the Reference Pixels in arcseconds
+
+        A = lastline[1]
+        B = lastline[2]
+        C = lastline[3]
+        D = lastline[4]
+        E = lastline[5]
+        F = lastline[6]
+
+        RefpixX = (C*E - D*A)/(D*B - A*E) - 1/D
+        RefpixY = (A*F - D*C)/(D*B - A*E)
+
+
+        # Date
+
+        tm = time.gmtime()
+        date = str(tm[0])+"-"+str(tm[1])+"-"+str(tm[2])+"T"+str(tm[3])+":"+str(tm[4])+":"+str(tm[5])
+
+        hdu = pyfits.PrimaryHDU()
+        hdrWCS = CreateWCS(hdu,prod_dir,CentRA,CentDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,date)
+        
+        hdrNewImage = CreateNewImage(prihdr,hdulist,prod_dir,CentRA,CentDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,date)
+
+        '''
         cmd = 'python '+fits_dir+'AstrometryFITS.py '+FileFitsImage
 
         ExecuteCommand(prod_dir+'new-image.fits',prod_dir+'wcs.fits',cmd,True)
+
+        '''
 
         time2 = time.time()
         duration = time2-time1
