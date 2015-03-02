@@ -686,7 +686,8 @@ main(int argc, char *argv[]) {
           stat1 = (x2bar-y2bar)/(x2bar+y2bar);
           stat2 = (xybar/(x2bar+y2bar));
           Size =  (x2bar+y2bar);
-          fprintf(FPeakStatObj, "%g %g %g %g %g %g %g %d \n",key[0],key[1],allpixel,top_pixel,Size,stat1,stat2,npixel);
+          //fprintf(FPeakStatObj, "%g %g %g %g %g %g %g %d \n",key[0],key[1],allpixel,top_pixel,Size,stat1,stat2,npixel);
+          fprintf(FPeakStatObj, "%g %g %g %g %g %g %g %d \n",key[0]+xbar,key[1]+ybar,allpixel,top_pixel,Size,stat1,stat2,npixel);
       }
         
      // printf("%g %g %g \n",Size,stat1,stat2);

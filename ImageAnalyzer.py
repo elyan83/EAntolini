@@ -124,7 +124,7 @@ def point_in_poly(vertices,x,y):
 
 
 
-def CreateWCS(Self,Dir,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Nx,Ny,Date):
+def CreateWCS(Self,Dir,Filename,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Nx,Ny,Aorder,Z,Date):
     
     Self.header['WCSAXES'] = 2,' '
     
@@ -167,22 +167,29 @@ def CreateWCS(Self,Dir,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Nx,Ny,Date):
     Self.header['IMAGEW'] = Nx,'Image width,  in pixels'
     Self.header['IMAGEH'] = Ny,'Image height, in pixels.'
     
+    # Polynomial Distortions
+    
+    #Self.header['A_ORDER'] = Aorder,'Polynomial order, axis 1'
+    #Self.header['A_0']     = Z[0],' '
+    #Self.header['A_1']     = Z[1],' '
+    #Self.header['A_2']     = Z[2],' '
+    
     # Date
     Self.header['DATE'] = Date,'Date this file was created.'
     
-    if os.path.exists(Dir+'wcs.fits') == False :
+    if os.path.exists(Dir+Filename) == False :
         
-        Self.writeto(Dir+'wcs.fits')
+        Self.writeto(Dir+Filename)
         
-        print(Dir+'wcs.fits' + " has been created"+"\n")
+        print(Dir+Filename + " has been created"+"\n")
             
     else :
                 
-        print(Dir+'wcs.fits' + " already exists"+"\n")
+        print(Dir+Filename + " already exists"+"\n")
     
     return Self
 
-def CreateNewImage(Self,hlist,Dir,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Nx,Ny,Date):
+def CreateNewImage(Self,hlist,Dir,Filename,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Nx,Ny,Aorder,Z,Date):
     
     #EXTEND Generates an error
     del Self['EXTEND']
@@ -229,20 +236,27 @@ def CreateNewImage(Self,hlist,Dir,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Nx
     Self.append(('IMAGEW',Nx,'Image width,  in pixels'),end=True)
     Self.append(('IMAGEH',Ny,'Image height, in pixels.'),end=True)
     
+    # Polynomial Distortions
+    
+    #Self.append(('A_ORDER',Aorder,'Polynomial order, axis 1'),end=True)
+    #Self.append(('A_0',Z[0],' '),end=True)
+    #Self.append(('A_1',Z[1],' '),end=True)
+    #Self.append(('A_2',Z[2],' '),end=True)
+    
     # Date
     
     Self.append(('DATE', Date,'Date this file was created.'),end=True)
     
                 
-    if os.path.exists(Dir+'new-image.fits') == False :
+    if os.path.exists(Dir+Filename) == False :
                 
-         hlist.writeto(Dir+'new-image.fits')
+         hlist.writeto(Dir+Filename)
          
-         print(Dir+'new-image.fits' + " has been created"+"\n")
+         print(Dir+Filename + " has been created"+"\n")
                 
     else :
                 
-        print(Dir+'new-image.fits' + " already exists"+"\n")
+        print(Dir+Filename + " already exists"+"\n")
     
     return Self
 
@@ -532,6 +546,9 @@ def main():
         X_Trans_Cat        = array('f')
         Y_Trans_Cat        = array('f')
         F_Trans_Cat        = array('f')
+        X_Image_Obj        = array('f')
+        Y_Image_Obj        = array('f')
+
 
         # Catalog Stars inside the box Image
         X_All_Cat     = array('f')
@@ -558,8 +575,10 @@ def main():
         Stat2_Missing_Image    = array('f')
 
         # Stars in the Image which r <= 5*mean
-        X_Matched_Image    = array('f')
-        Y_Matched_Image    = array('f')
+        X_Matched_Image     = array('f')
+        Y_Matched_Image     = array('f')
+        X_Matched_Image_ICS = array('f')
+        Y_Matched_Image_ICS = array('f')
         F_Matched_Image    = array('f')
         Mag_Matched_Image  = array('f')
 
@@ -613,7 +632,7 @@ def main():
         #Fourth Corner (nx,0)
         box_image_x[3] = nx*lastline[1] + 0*lastline[2] + lastline[3]
         box_image_y[3] = nx*lastline[4] + 0*lastline[5] + lastline[6]
-
+        
 
         # Fill the vertices of the Box
         vertices = [(box_image_x[0],box_image_y[0]),(box_image_x[1],box_image_y[1]),(box_image_x[2],box_image_y[2]),(box_image_x[3],box_image_y[3])]
@@ -623,7 +642,7 @@ def main():
         X_All_Cat,Y_All_Cat,F_All_Cat,Ra_All_Cat,Dec_All_Cat  = np.loadtxt(SortedCat,unpack=True)
 
         #Load matched infromations
-        distances,X_Trans_Cat,Y_Trans_Cat,F_Trans_Cat  = np.loadtxt(prod_dir+'Match',usecols=[10,11,12,13],unpack=True)
+        X_Image_Obj,Y_Image_Obj, distances,X_Trans_Cat,Y_Trans_Cat,F_Trans_Cat  = np.loadtxt(prod_dir+'Match',usecols=[2,3,10,11,12,13],unpack=True)
     
         # Sort objects from shorter to further distances (11th column of Match)
         x = sorted(distances)
@@ -692,6 +711,8 @@ def main():
                     
                     X_Matched_Image.append(X_Trans_Image[i])
                     Y_Matched_Image.append(Y_Trans_Image[i])
+                    X_Matched_Image_ICS.append(X_Image_Obj[i])
+                    Y_Matched_Image_ICS.append(Y_Image_Obj[i])
                     F_Matched_Image.append(Flux_Image[i])
                     Mag_Matched_Image.append(- 20 - ((log10(Flux_Image[i]))/0.4))
                     Size_Matched_Image.append(Size_Image[i])
@@ -702,8 +723,9 @@ def main():
                     Y_Matched_Cat.append(Y_Trans_Cat[i])
                     F_Matched_Cat.append(F_Trans_Cat[i])
                     Mag_Matched_Cat.append(- 20 - ((log10(F_Trans_Cat[i]))/0.4))
-
-                    FMatchedStars.write(str(X_Trans_Image[i])+" "+str(Y_Trans_Image[i])+" "+str(Flux_Image[i])+" "+str(- 20 - ((log10(Flux_Image[i]))/0.4))+" "+str(Size_Image[i])+" "+str(Stat1_Image[i])+" "+str(Stat2_Image[i])+" "+str(X_Trans_Cat[i])+" "+str(Y_Trans_Cat[i])+" "+str(F_Trans_Cat[i])+" "+str(- 20 - ((log10(F_Trans_Cat[i]))/0.4))+"\n")
+                    
+                 
+                    FMatchedStars.write(str(X_Image_Obj[i])+" "+str(Y_Image_Obj[i])+" "+str(X_Trans_Image[i])+" "+str(Y_Trans_Image[i])+" "+str(Flux_Image[i])+" "+str(- 20 - ((log10(Flux_Image[i]))/0.4))+" "+str(Size_Image[i])+" "+str(Stat1_Image[i])+" "+str(Stat2_Image[i])+" "+str(X_Trans_Cat[i])+" "+str(Y_Trans_Cat[i])+" "+str(F_Trans_Cat[i])+" "+str(- 20 - ((log10(F_Trans_Cat[i]))/0.4))+"\n")
 
 
 
@@ -840,6 +862,27 @@ def main():
         FGoodnessStars.close()
         FGoodnessAll.close()
 
+
+
+        DeltaX      = array('f')
+        DeltaY      = array('f')
+
+        # Find the difference in position between Matched Stars (Catalog-Image) in Catalog Coordinate System
+
+        for j in range(len(X_Matched_Image)):
+            DeltaX.append(X_Matched_Image[j] - X_Matched_Cat[j])
+            DeltaY.append(Y_Matched_Image[j] - Y_Matched_Cat[j])
+
+
+        z = np.polyfit(DeltaX,DeltaY,2)
+        #w = np.polyfit(Y_Matched_Image,Y_Matched_Cat,2)
+
+        #z = np.polyfit(X_Matched_Image,Y_Matched_Image,2)
+        #z = np.polynomial.polynomial.polyval2d(X_Matched_Image,X_Matched_Cat,[1,1])
+
+        print z
+
+
         # Plot the cumulative distribution of the distances
         plt.figure(1)
         host = host_subplot(111)
@@ -920,11 +963,13 @@ def main():
 
         # Transform Reference Point from ICS to CCS
 
+
         CRVAL1 =  (cfg.ccd_field_centre[0]*lastline[1] + cfg.ccd_field_centre[1]*lastline[2] + lastline[3])/3600
         CRVAL2 =  (cfg.ccd_field_centre[0]*lastline[4] + cfg.ccd_field_centre[1]*lastline[5] + lastline[6])/3600
 
-        CentRA = (CenterRA*15) + CRVAL1
-        CentDEC = CenterDEC + CRVAL2
+        CentRA = (CenterRA*15) #+ CRVAL1
+
+        CentDEC = CenterDEC #+ CRVAL2
 
         # Compute the Reference Pixels in arcseconds
 
@@ -935,26 +980,29 @@ def main():
         E = lastline[5]
         F = lastline[6]
 
-        RefpixX = (C*E - D*A)/(D*B - A*E) - 1/D
+        #RefpixX = (C*E - D*A)/(D*B - A*E) - 1/D
+        
+        RefpixX = (B*F-C*E)/(A*E-B*D)
         RefpixY = (A*F - D*C)/(D*B - A*E)
+        #RefpixY = -((A*F-C*D)/(A*E-B*D))
+
+
 
 
         # Date
 
         tm = time.gmtime()
         date = str(tm[0])+"-"+str(tm[1])+"-"+str(tm[2])+"T"+str(tm[3])+":"+str(tm[4])+":"+str(tm[5])
+        
+        File1 = 'wcs.wcs'
+        File2 = 'new-image.fits'
 
         hdu = pyfits.PrimaryHDU()
-        hdrWCS = CreateWCS(hdu,prod_dir,CentRA,CentDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,date)
+        hdrWCS = CreateWCS(hdu,prod_dir,File1,CentRA,CentDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,2,z,date)
         
-        hdrNewImage = CreateNewImage(prihdr,hdulist,prod_dir,CentRA,CentDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,date)
+        hdrNewImage = CreateNewImage(prihdr,hdulist,prod_dir,File2,CentRA,CentDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,2,z,date)
 
-        '''
-        cmd = 'python '+fits_dir+'AstrometryFITS.py '+FileFitsImage
 
-        ExecuteCommand(prod_dir+'new-image.fits',prod_dir+'wcs.fits',cmd,True)
-
-        '''
 
         time2 = time.time()
         duration = time2-time1
