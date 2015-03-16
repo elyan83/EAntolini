@@ -12,6 +12,8 @@ from scipy import optimize
 import algopy
 from array import *
 import numpy as np
+import math
+from scipy.optimize import leastsq
 
 sys.path.append('/ocs/modules')
 import cfg
@@ -22,15 +24,6 @@ import cfg
 #
 
 
-def residuals(a,b,c,y,u,v):
-
-    err = y - (a*u*v + b*v*v + c*u*u)
-
-    return err
-
-def peval(u,v,p):
-    
-    return p[0]*u*v+p[1]*v*v+p[2]*u*u
 
 
 
@@ -71,6 +64,8 @@ def main():
         DeltaU    = array('f') #Distance North from the center of  Catalog object in the ICS
         DeltaV    = array('f') #Distance East  from the center of  Catalog object in the ICS
         
+        ytrue = array('f')
+        
         #Load matched infromations
         u_Image,v_Image, x_Cat,y_Cat = np.loadtxt(prod_dir+'FMatchedStars.txt',usecols=[0,1,2,3],unpack=True)
 
@@ -101,13 +96,83 @@ def main():
             V_Cat.append((1/(A*E-D*B))*(A*(y_Cat[j] - F)-D*(x_Cat[j]-C)))
             DeltaV.append(V_Cat[j]-v_Image[j])
 
+
         #Compute inverse Matrix
 
-        for i in range(len(u_Image)):
-            fMatrix = np.array([[u_Image[i]*v_Image[i],u_Image[i]*u_Image[i],v_Image[i]*v_Image[i]],[u_Image[i]*v_Image[i],u_Image[i]*u_Image[i],v_Image[i]*v_Image[i]],[u_Image[i]*v_Image[i],u_Image[i]*u_Image[i],v_Image[i]*v_Image[i]]])
+        x11 = 0.0
+        x12 = 0.0
+        x13 = 0.0
+        x21 = 0.0
+        x22 = 0.0
+        x23 = 0.0
+        x31 = 0.0
+        x32 = 0.0
+        x33 = 0.0
 
-            fMatrixInv = inv(fMatrix)
-            print fMatrixInv
+        q1_U = 0.0
+        q2_U = 0.0
+        q3_U = 0.0
+
+        q1_V = 0.0
+        q2_V = 0.0
+        q3_V = 0.0
+
+        p = [1e-07 ,-1e-9, 1e-8]
+
+
+        for i in range(len(u_Image)):
+            
+         x11 += pow(u_Image[i],4)
+         x12 += pow(u_Image[i],3)*v_Image[i]
+         x13 += pow(v_Image[i],2)*pow(u_Image[i],2)
+
+         x21 += pow(u_Image[i],3)*v_Image[i]
+         x22 += pow(v_Image[i],2)*pow(u_Image[i],2)
+         x23 += pow(v_Image[i],3)*u_Image[i]
+
+         x31 += pow(v_Image[i],2)*pow(u_Image[i],2)
+         x32 += pow(v_Image[i],3)*u_Image[i]
+         x33 += pow(v_Image[i],4)
+
+         q1_U += pow(u_Image[i],2)*DeltaU[i]
+         q2_U += v_Image[i]*u_Image[i]*DeltaU[i]
+         q3_U += pow(v_Image[i],2)*DeltaU[i]
+
+         q1_V += pow(u_Image[i],2)*DeltaV[i]
+         q2_V += v_Image[i]*u_Image[i]*DeltaV[i]
+         q3_V += pow(v_Image[i],2)*DeltaV[i]
+        
+        
+
+
+        fMatrix = np.array([[x11,x12,x13],[x21,x22,x23],[x31,x32,x33]])
+
+        fMatrixInv = inv(fMatrix)
+
+        a_U = fMatrixInv[0][0]*q1_U+fMatrixInv[0][1]*q2_U+fMatrixInv[0][2]*q3_U
+        b_U = fMatrixInv[1][0]*q1_U+fMatrixInv[1][1]*q2_U+fMatrixInv[1][2]*q3_U
+        c_U = fMatrixInv[2][0]*q1_U+fMatrixInv[2][1]*q2_U+fMatrixInv[2][2]*q3_U
+
+        a_V = fMatrixInv[0][0]*q1_V+fMatrixInv[0][1]*q2_V+fMatrixInv[0][2]*q3_V
+        b_V = fMatrixInv[1][0]*q1_V+fMatrixInv[1][1]*q2_V+fMatrixInv[1][2]*q3_V
+        c_V = fMatrixInv[2][0]*q1_V+fMatrixInv[2][1]*q2_V+fMatrixInv[2][2]*q3_V
+
+        print a_U,b_U,c_U
+        print a_V,b_V,c_V
+
+        tplInitial1 = (1e-07 ,-1e-9, 1e-8)
+        tplInitial2 = (-1e-13 ,1e-13, -1e-13)
+
+        funcQuad=lambda tpl,u_Image,v_Image : tpl[0]*u_Image**2+tpl[1]*u_Image*v_Image+tpl[2]*v_Image**2
+        func=funcQuad
+        ErrorFunc1=lambda tpl,u_Image,v_Image,DeltaU: func(tpl,u_Image,v_Image)-DeltaU
+        ErrorFunc2=lambda tpl,u_Image,v_Image,DeltaU: func(tpl,u_Image,v_Image)-DeltaV
+
+        tplFinal1,success=leastsq(ErrorFunc1,tplInitial1[:],args=(u_Image,v_Image,DeltaU))
+        tplFinal2,success=leastsq(ErrorFunc2,tplInitial2[:],args=(u_Image,v_Image,DeltaV))
+        print "quadratic fit of U and u" ,tplFinal1
+        print "quadratic fit of V and v" ,tplFinal2
+
 
 
 #------------------------------------------------------------------------------
