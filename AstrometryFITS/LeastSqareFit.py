@@ -160,6 +160,9 @@ def main():
         print a_U,b_U,c_U
         print a_V,b_V,c_V
 
+
+        #Comparison with Leastsquare Function
+
         tplInitial1 = (1e-07 ,-1e-9, 1e-8)
         tplInitial2 = (-1e-13 ,1e-13, -1e-13)
 
