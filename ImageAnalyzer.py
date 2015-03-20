@@ -25,6 +25,9 @@ import subprocess
 sys.path.append('/ocs/modules')
 import cfg
 
+sys.path.append('/Users/Elisa/c/EAntolini/Routines')
+import Astrometry
+
 
 #------------------------------------------------------------------------------
 # Implementation of Functions
@@ -117,144 +120,6 @@ def ExecuteCommandFileOut(Filename,command):
 
 
 
-def CreateWCS(Self,Dir,Filename,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Nx,Ny,Aorder,Z,Date):
-    
-    Self.header['WCSAXES'] = 2,' '
-    
-    Self.header['CTYPE1'] = 'RA---TAN-SIP','TAN (gnomic) projection + SIP distortions'
-    Self.header['CTYPE2'] = 'DEC---TAN-SIP','TAN (gnomic) projection + SIP distortions'
-    Self.header['EQUINOX'] = 2000.0,'Equatorial coordinates definition (yr)'
-    
-    Self.header['LONPOLE'] = 180.0,' '
-    Self.header['LATPOLE'] = 0.0,' '
-    
-    
-    
-    
-    # RA and DEC reference Points
-    
-    Self.header['CRVAL1'] = cenVAL1,'RA  of reference point'
-    Self.header['CRVAL2'] = cenVAL2,'DEC  of reference point'
-    
-    # Pixels Reference Points
-    
-    Self.header['CRPIX1'] = cenPIX1,'X reference pixel'
-    Self.header['CRPIX2'] = cenPIX2,'Y reference pixel'
-    
-    # Units
-    
-    Self.header['CUNIT1'] = 'deg','X pixel scale units '
-    Self.header['CUNIT2'] = 'deg','Y pixel scale units '
-    
-    # Transformation Matrix
-    
-    Self.header['CD1_1'] = a,'Transformation matrix'
-    Self.header['CD1_2'] = b,' '
-    Self.header['CD2_1'] = d,' '
-    Self.header['CD2_2'] = e,' '
-    
-    # Additional Constants of the Transformation Matrix
-    #Self.header['CD1_3'] = c,'Additional Constants'
-    #Self.header['CD2_3'] = f,' '
-    
-    Self.header['IMAGEW'] = Nx,'Image width,  in pixels'
-    Self.header['IMAGEH'] = Ny,'Image height, in pixels.'
-    
-    # Polynomial Distortions
-    
-    #Self.header['A_ORDER'] = Aorder,'Polynomial order, axis 1'
-    #Self.header['A_0']     = Z[0],' '
-    #Self.header['A_1']     = Z[1],' '
-    #Self.header['A_2']     = Z[2],' '
-    
-    # Date
-    Self.header['DATE'] = Date,'Date this file was created.'
-    
-    if os.path.exists(Dir+Filename) == False :
-        
-        Self.writeto(Dir+Filename)
-        
-        print(Dir+Filename + " has been created"+"\n")
-            
-    else :
-                
-        print(Dir+Filename + " already exists"+"\n")
-    
-    return Self
-
-def CreateNewImage(Self,hlist,Dir,Filename,cenVAL1,cenVAL2,cenPIX1,cenPIX2,a,b,c,d,e,f,Nx,Ny,Aorder,Z,Date):
-    
-    #EXTEND Generates an error
-    del Self['EXTEND']
-    
-    Self.append(('WCSAXES',2,' '),end=True)
-    
-    Self.append(('CTYPE1','RA---TAN-SIP','TAN (gnomic) projection + SIP distortions'),end=True)
-    Self.append(('CTYPE2','DEC---TAN-SIP','TAN (gnomic) projection + SIP distortions'),end=True)
-    Self.append(('EQUINOX', 2000.0,'Equatorial coordinates definition (yr)'),end=True)
-    
-    Self.append(('LONPOLE',180.0,' '),end=True)
-    Self.append(('LATPOLE',0.0,' '),end=True)
-    
-
-    
-    
-    # RA and DEC reference Points
-    
-    Self.append(('CRVAL1', cenVAL1, 'RA  of reference point'),end=True)
-    Self.append(('CRVAL2', cenVAL2, 'DEC  of reference point'),end=True)
-    
-    # Pixels Reference Points
-    
-    Self.append(('CRPIX1', cenPIX1, 'X reference pixel'),end=True)
-    Self.append(('CRPIX2', cenPIX2, 'Y reference pixel'),end=True)
-    
-    # Units
-    
-    Self.append(('CUNIT1', 'deg','X pixel scale units '),end=True)
-    Self.append(('CUNIT2', 'deg','Y pixel scale units '),end=True)
-    
-    # Transformation Matrix
-    
-    Self.append(('CD1_1',a,'Transformation matrix'),end=True)
-    Self.append(('CD1_2',b,' '),end=True)
-    Self.append(('CD2_1',d,' '),end=True)
-    Self.append(('CD2_2',e,' '),end=True)
-    
-    # Additional Constants of the Transformation Matrix
-    
-    #Self.append(('CD1_3',c,'Additional Constants'),end=True)
-    #Self.append(('CD2_3',f,' '),end=True)
-                
-    Self.append(('IMAGEW',Nx,'Image width,  in pixels'),end=True)
-    Self.append(('IMAGEH',Ny,'Image height, in pixels.'),end=True)
-    
-    # Polynomial Distortions
-    
-    #Self.append(('A_ORDER',Aorder,'Polynomial order, axis 1'),end=True)
-    #Self.append(('A_0',Z[0],' '),end=True)
-    #Self.append(('A_1',Z[1],' '),end=True)
-    #Self.append(('A_2',Z[2],' '),end=True)
-    
-    # Date
-    
-    Self.append(('DATE', Date,'Date this file was created.'),end=True)
-    
-                
-    if os.path.exists(Dir+Filename) == False :
-                
-         hlist.writeto(Dir+Filename)
-         
-         print(Dir+Filename + " has been created"+"\n")
-                
-    else :
-                
-        print(Dir+Filename + " already exists"+"\n")
-    
-    return Self
-
-
-
 #------------------------------------------------------------------------------
 # main
 #
@@ -280,13 +145,19 @@ def main():
     else:
     
     
-    
+        #### Input Parameters #####
+        
         # Image to Analyze - Give the full path
         FileFitsImage  = args[0]
-       
-        #fileImage = args[1]
         
+        #Fit Comparison
+        CompareFit = args[1]
         
+        # Print Out Plots
+        Show = args[2]
+
+        ###########################
+
         # Catalog Path
         ctg = '/Users/Elisa/c/Catalogs/'
         
@@ -295,6 +166,7 @@ def main():
         
         # Image Peak Path
         pso = '/Users/Elisa/c/Files/'
+        
         
         # File Product Directory
         prod_dir = '/Users/Elisa/c/EAntolini/ProductFiles/'
@@ -309,26 +181,6 @@ def main():
         # Routines Dir
         RoutDir = '/Users/Elisa/c/EAntolini/Routines/'
         
-        # Transformed Catalog Coordinates and Fluxes
-        X_Cat      = array('f')
-        Y_Cat      = array('f')
-        Flux_Cat   = array('f')
-        RA_Cat     = array('f')
-        DEC_Cat    = array('f')
-        
-        # Image Coordinates and Fluxes
-        X_Imge       = array('f')
-        Y_Image      = array('f')
-        Flux_Image   = array('f')
-        Peak_Image   = array('f')
-        Size_Image   = array('f')
-        Stat1_Image  = array('f')
-        Stat2_Image  = array('f')
-        Npixel_Image = array('f')
-        
-        # Image Transformed Coordinates
-        X_Trans_Image     = array('f')
-        Y_Trans_Image     = array('f')
         
 
         # Get the Center of the Image from the Header
@@ -450,7 +302,7 @@ def main():
 
 
 
-        # Sort the PeakStatObj.txt from brightest to fainter fluxes
+        # Sort the PeakStatObj.txt from brightest to fainter fluxes and write all information in Newfile
 
         X_Image,Y_Image,Flux_Image,Peak_Image,Size_Image,Stat1_Image,Stat2_Image,Npixel_Image = np.loadtxt(FilePeakImage, unpack = True)
         bubble_sort_image(X_Image,Y_Image,Flux_Image,Peak_Image,Size_Image,Stat1_Image,Stat2_Image,Npixel_Image)
@@ -513,14 +365,14 @@ def main():
         X_Image,Y_Image,Flux_Image,Peak_Image,Size_Image,Stat1_Image,Stat2_Image,Npixel_Image = np.loadtxt(SortedImage, unpack = True)
         X_Trans_Image,Y_Trans_Image= np.loadtxt(prod_dir+'Newfile',usecols=[0,1],dtype=[('f0',float),('f1',float)], unpack = True)
 
-        print len(X_Trans_Image)
-        print len(X_Image)
+
 
         #Compute the Image coordinate transformation from the Image Coordinate System to the Catalog Coordinate Syatem
 
         with  open(prod_dir+'Newfile', 'w') as fNewfile:
             for j in range(len(X_Trans_Image)):
                 fNewfile.write(str(X_Trans_Image[j])+" "+str(Y_Trans_Image[j])+" "+str(X_Image[j])+" "+str(Y_Image[j])+" "+str(Flux_Image[j])+" "+str(Peak_Image[j])+" "+str(Size_Image[j])+" "+str(Stat1_Image[j])+" "+str(Stat2_Image[j])+" "+str(Npixel_Image[j])+"\n")
+
 
 
         # Compute the matching between the objects in the image and the objects in the whole catalog using the Catalog Coordinate System (CCS)
@@ -530,12 +382,61 @@ def main():
         ExecuteCommandFileOut(prod_dir+'Match',cmd)
 
 
-        # Compute Astrometry
+        #Load matched infromations
+        X_Image_Obj,Y_Image_Obj, distances,X_Trans_Cat,Y_Trans_Cat,F_Trans_Cat  = np.loadtxt(prod_dir+'Match',usecols=[2,3,10,11,12,13],unpack=True)
 
-        #cmd = ['python',RoutDir+'Astrometry.py',prod_dir,nx,ny,SortedCat,prod_dir+"PeakStatObj.txt"]
-        cmd = ['python',RoutDir+'Astrometry.py',prod_dir,str(nx),str(ny),SortedCat,prod_dir+'PeakStatObj.txt',str(X_Cat),str(Y_Cat)]
-        call(cmd)
+        ####################### Compute Astrometry #####################
 
+         #Create the Box Image Size in the Catalog Coordinate Sytem
+        lastline,vertices = Astrometry.GenBoxImge(prod_dir+'TriangleOut.txt',SortedCat,nx,ny,prod_dir)
+
+
+         #Compute Mean and Sigma of the distances and Generate the Missing and Matching files and the statistical parameters
+
+        Size_Goodness,Stat1_Goodness,Stat2_Goodness,Size_Good_Stars,Stat1_Good_Stars,Stat2_Good_Stars,Mag_Miss_Stars_Image,Mag_Missing_Image,X_Missing_Image,Y_Missing_Image = Astrometry.MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat,Y_Trans_Cat,F_Trans_Cat,X_Trans_Image,Y_Trans_Image,Flux_Image,Size_Image,Stat1_Image,Stat2_Image)
+
+
+
+        # Plot the cumulative distribution of the distances
+        Astrometry.MakePlot(1,1,"Cumulative distribution of the distances",prod_dir+"CatImageOverlap.pdf","Distances","Number of Times",False,sorted(distances),np.arange(len(distances)),0.0,0.0,0.0,0.0,Show)
+
+        # Plot the cumulative distribution of the Matched Stars (Image and Catalog) and of the Stars in the Catalog inside the box image
+        #Astrometry.MakePlot(2,3,"Image and Catalog Overlap",prod_dir+"MagnitudesDistribution.png","Magnitude","Number of Times",False,Mag_Box_Cat,np.arange(len(Mag_Box_Cat)),sorted(Mag_Matched_Cat), np.arange(len(Mag_Matched_Cat)),Mag_Matched_Image, np.arange(len(Mag_Matched_Image)),Show)
+
+
+        # plot the Catalog and Image overlap in the same coordinate system
+        Astrometry.MakePlot(3,3,"Image and Catalog Overlap",prod_dir+"CatImageOverlap.pdf","X coordinate","Y coordinate",False,X_Trans_Image,Y_Trans_Image,X_Cat,Y_Cat,X_Missing_Image,Y_Missing_Image,Show)
+
+        # Plot Size_Goodness, Stat1_Goodness and Stat2_Goodness for all the Missing objects
+        Astrometry.MakePlot(4,3,"Statistical Analysis of Possible Stars",prod_dir+"Goodness.png","Magnitude","Goodness",True,Mag_Missing_Image, Size_Goodness,Mag_Missing_Image, Stat1_Goodness,Mag_Missing_Image, Stat2_Goodness,Show)
+
+
+        #  Plot Size_Goodness, Stat1_Goodness and Stat2_Goodness for the Star-like objects candidates belonging to the Missing Stars
+        Astrometry.MakePlot(5,3,"Statistical Analysis of Possible Stars",prod_dir+"PossibleStarsGoodness.png","Magnitude","Goodness",True,Mag_Miss_Stars_Image,Size_Good_Stars,Mag_Miss_Stars_Image, Stat1_Good_Stars,Mag_Miss_Stars_Image, Stat2_Good_Stars,Show)
+
+
+
+
+
+        RefpixX,RefpixY,A,B,C,D,E,F = Astrometry.GetRefPoint(lastline,cfg.ccd_field_centre,CenterRA*15,CenterDEC)
+
+        date = Astrometry.GetDate()
+
+
+         # Fit with least square methid  the difference in position between Matched Stars-objects (Catalog-Image) in Catalog Coordinate System
+
+        A_11,A_12,A_13,B_11,B_12,B_13,DeltaU,DeltaV = Astrometry.LeastSquareFit(X_Image_Obj,Y_Image_Obj,X_Trans_Image,Y_Trans_Image,A,B,C,D,E,F)
+
+        CompareFit = True
+
+        #Comare the previous Fit
+        if CompareFit == True :
+
+            p = [Astrometry.InitPar(str(A_11)),Astrometry.InitPar(str(A_12)),Astrometry.InitPar(str(A_13)),Astrometry.InitPar(str(B_11)),Astrometry.InitPar(str(B_12)),Astrometry.InitPar(str(B_13))]
+
+            Astrometry.LeastSquareFitComparison(X_Image_Obj,Y_Image_Obj,DeltaU,DeltaV,p)
+
+        Z = [A_11,A_12,A_13,B_11,B_12,B_13]
 
         #Create FITS files with Astrometric Information
 
@@ -545,46 +446,13 @@ def main():
 
 
 
-        # Transform Reference Point from ICS to CCS
-
-
-        CRVAL1 =  (cfg.ccd_field_centre[0]*lastline[1] + cfg.ccd_field_centre[1]*lastline[2] + lastline[3])/3600
-        CRVAL2 =  (cfg.ccd_field_centre[0]*lastline[4] + cfg.ccd_field_centre[1]*lastline[5] + lastline[6])/3600
-
-        CentRA = (CenterRA*15) #+ CRVAL1
-
-        CentDEC = CenterDEC #+ CRVAL2
-
-        # Compute the Reference Pixels in arcseconds
-
-        A = lastline[1]
-        B = lastline[2]
-        C = lastline[3]
-        D = lastline[4]
-        E = lastline[5]
-        F = lastline[6]
-
-
-        
-        RefpixX = (B*F-C*E)/(A*E-B*D)
-        RefpixY = (A*F - D*C)/(D*B - A*E)
-   
-
-
-
-
-        # Date
-
-        tm = time.gmtime()
-        date = str(tm[0])+"-"+str(tm[1])+"-"+str(tm[2])+"T"+str(tm[3])+":"+str(tm[4])+":"+str(tm[5])
-        
         File1 = 'wcs.wcs'
         File2 = 'new-image.fits'
 
         hdu = pyfits.PrimaryHDU()
-        hdrWCS = CreateWCS(hdu,prod_dir,File1,CentRA,CentDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,2,z,date)
+        hdrWCS = Astrometry.CreateWCS(hdu,prod_dir,File1,CenterRA*15,CenterDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,2,2,Z,date)
         
-        hdrNewImage = CreateNewImage(prihdr,hdulist,prod_dir,File2,CentRA,CentDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,2,z,date)
+        hdrNewImage = Astrometry.CreateNewImage(prihdr,hdulist,prod_dir,File2,CenterRA*15,CenterDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,2,2,Z,date)
 
 
 
@@ -592,7 +460,7 @@ def main():
         duration = time2-time1
         print("The script runs from start to finish in "+str(duration)+" seconds "+"\n")
 
-        '''
+
 #------------------------------------------------------------------------------
 # Start program execution.
 #

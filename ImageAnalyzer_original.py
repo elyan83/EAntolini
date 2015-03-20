@@ -304,7 +304,7 @@ def main():
         pso = '/Users/Elisa/c/Files/'
         
         # File Product Directory
-        prod_dir = '/Users/Elisa/c/EAntolini/ProductFiles/'
+        prod_dir = '/Users/Elisa/c/EAntolini/Prod_Files_old/'
         
         # Base Directory
         base_dir = '/Users/Elisa/c/EAntolini/'
