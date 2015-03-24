@@ -117,7 +117,32 @@ def ExecuteCommandFileOut(Filename,command):
     return Exec
 
 
+def create_dir(f):
+    
+    d = os.path.dirname(f)
 
+    if  os.path.exists(d) == False:
+    
+        os.mkdir(d)
+        print("The directory "+f+" has been created"+"\n")
+
+    else:
+
+        print("The directory "+f+" already exists"+"\n")
+
+
+def RemovePath(Filename):
+    
+    Remove = array('b')
+    
+    for i in range(0,len(Filename)):
+        if Filename[i] == '/':
+            Remove.append(i)
+    
+    stopRemove = Remove[len(Remove)-1]+1
+
+    return Filename.replace(Filename[Remove[0]:stopRemove],'')
+    
 
 
 #------------------------------------------------------------------------------
@@ -151,10 +176,10 @@ def main():
         FileFitsImage  = args[0]
         
         #Fit Comparison
-        CompareFit = args[1]
+        CompareFit = (args[1] == "True")
         
         # Print Out Plots
-        Show = args[2]
+        Show = (args[2] == "True")
 
         ###########################
 
@@ -167,10 +192,6 @@ def main():
         # Image Peak Path
         pso = '/Users/Elisa/c/Files/'
         
-        
-        # File Product Directory
-        prod_dir = '/Users/Elisa/c/EAntolini/ProductFiles/'
-        
         # Base Directory
         base_dir = '/Users/Elisa/c/EAntolini/'
         
@@ -180,6 +201,18 @@ def main():
         
         # Routines Dir
         RoutDir = '/Users/Elisa/c/EAntolini/Routines/'
+        
+        #print FileFitsImage
+        
+        prod_dir = RemovePath(FileFitsImage)
+        
+        prod_dir = prod_dir.replace('.fits','/')
+        
+        # File Product Directory
+        prod_dir = '/Users/Elisa/c/EAntolini/'+prod_dir
+        
+        create_dir(prod_dir)
+        
         
         
 
@@ -203,9 +236,11 @@ def main():
         if os.path.exists(FilePeakImage) == False :
         
             cmd = base_dir+"imageproc2f"
+            
+            print [cmd, FileFitsImage,prod_dir+"PeakStatObj.txt"]
         
             execWait = True
-            subproc = subprocess.Popen([cmd, FileFitsImage])
+            subproc = subprocess.Popen([cmd, FileFitsImage,prod_dir+"PeakStatObj.txt"])
             print(FilePeakImage + " Has Been Created"+"\n")
  
         
@@ -219,7 +254,7 @@ def main():
 
          # Generate the Catalog
 
-
+        '''
         Remove = array('b')
 
         for i in range(0,len(FileFitsImage)):
@@ -230,6 +265,12 @@ def main():
 
         FileCatalog = FileFitsImage.replace(FileFitsImage[Remove[0]:stopRemove],'')
 
+        FileCatalog = FileCatalog.replace('.fits','.cat')
+        
+        '''
+        
+        FileCatalog = RemovePath(FileFitsImage)
+        
         FileCatalog = FileCatalog.replace('.fits','.cat')
 
 
@@ -427,10 +468,10 @@ def main():
 
         A_11,A_12,A_13,B_11,B_12,B_13,DeltaU,DeltaV = Astrometry.LeastSquareFit(X_Image_Obj,Y_Image_Obj,X_Trans_Image,Y_Trans_Image,A,B,C,D,E,F)
 
-        CompareFit = True
 
-        #Comare the previous Fit
-        if CompareFit == True :
+
+        #Compare the previous Fit
+        if CompareFit :
 
             p = [Astrometry.InitPar(str(A_11)),Astrometry.InitPar(str(A_12)),Astrometry.InitPar(str(A_13)),Astrometry.InitPar(str(B_11)),Astrometry.InitPar(str(B_12)),Astrometry.InitPar(str(B_13))]
 
@@ -452,14 +493,14 @@ def main():
         hdu = pyfits.PrimaryHDU()
         hdrWCS = Astrometry.CreateWCS(hdu,prod_dir,File1,CenterRA*15,CenterDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,2,2,Z,date)
         
-        hdrNewImage = Astrometry.CreateNewImage(prihdr,hdulist,prod_dir,File2,CenterRA*15,CenterDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,2,2,Z,date)
+        #hdrNewImage = Astrometry.CreateNewImage(prihdr,hdulist,prod_dir,File2,CenterRA*15,CenterDEC,RefpixX,RefpixY,A/3600,B/3600,C/3600,D/3600,E/3600,F/3600,nx,ny,2,2,Z,date)
 
 
 
         time2 = time.time()
         duration = time2-time1
         print("The script runs from start to finish in "+str(duration)+" seconds "+"\n")
-
+        
 
 #------------------------------------------------------------------------------
 # Start program execution.

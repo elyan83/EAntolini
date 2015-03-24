@@ -174,8 +174,22 @@ main(int argc, char *argv[]) {
   double box_image_x[4];
   double box_image_y[4];
     
+    
   int readfimage( float **data, int *nx, int *ny, const char *filename );
+    
+  // PeakStatObject Path
+    
+  int n = strlen(argv[2]);
+  char FilePath[n];
 
+  strcpy(FilePath, argv[2]);
+    
+  printf("%s \n",FilePath);
+
+
+    
+    
+    
 #if 0 
   times(&first_time);
     
@@ -572,7 +586,9 @@ main(int argc, char *argv[]) {
   FImageBox = fopen("/Users/Elisa/c/Files/FImageBox.txt", "w");
     
   // This file contains the information about the Pixels statistics of the objects in the image
-  FPeakStatObj = fopen("/Users/Elisa/c/EAntolini/ProductFiles/PeakStatObj.txt", "w");
+  //FPeakStatObj = fopen("/Users/Elisa/c/EAntolini/ProductFiles/PeakStatObj.txt", "w");
+  FPeakStatObj = fopen(FilePath,"w");
+
     
 #endif
     

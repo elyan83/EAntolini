@@ -412,7 +412,7 @@ def MakePlot(ncanvas,ndata,title,FigName,xlab,ylab,invert,x1,y1,x2,y2,x3,y3,show
         plt.legend( loc='lower left')
         print(FigName+" has been created "+"\n")
 
-        if show ==True:
+        if show :
             plt.show()
                 
                 
