@@ -303,13 +303,12 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
             Stat2_Mean.append(Stat2_Mean_Val/count)
             Stat2_Mean_Val = 0
         
-        
-            for k in range(lenPoint, (lenPoint+lenDivide)):
-                Std_Mag_Mean_Val   += math.pow((Mag_Matched_Image[k] -  Mag_Mean[count2]),2)
-                Std_Size_Mean_Val  += math.pow((Size_Matched_Image[k] - Size_Mean[count2]),2)
-                Std_Stat1_Mean_Val += math.pow((Stat1_Matched_Image[k] - Stat1_Mean[count2]),2)
-                Std_Stat2_Mean_Val += math.pow((Stat2_Matched_Image[k] - Stat2_Mean[count2]),2)
-        
+
+            Std_Mag_Mean_Val=np.sum((Mag_Matched_Image[lenPoint,lenPoint+lenDivide]-Mag_Mean[Count2])**2)
+            Std_Size_Mean_Val =np.sum((Size_Matched_Image[[lenPoint,lenPoint+lenDivide]-Size_Mean[Count2])**2)
+            Std_Stat1_Mean_Val =np.sum((Stat1_Matched_Image[[lenPoint,lenPoint+lenDivide]-Stat1_Mean[Count2])**2)
+            Std_Stat1_Mean_Val =np.sum((Stat2_Matched_Image[[lenPoint,lenPoint+lenDivide]-Stat2_Mean[Count2])**2)
+            
         
             Mag_Dev.append(math.sqrt(Std_Mag_Mean_Val/count))
             Size_Dev.append(math.sqrt(Std_Size_Mean_Val/count))

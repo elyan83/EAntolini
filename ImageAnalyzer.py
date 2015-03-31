@@ -254,49 +254,40 @@ def main():
 
          # Generate the Catalog
 
-        '''
-        Remove = array('b')
 
-        for i in range(0,len(FileFitsImage)):
-            if FileFitsImage[i] == '/':
-                Remove.append(i)
-
-        stopRemove = Remove[len(Remove)-1]+1
-
-        FileCatalog = FileFitsImage.replace(FileFitsImage[Remove[0]:stopRemove],'')
-
-        FileCatalog = FileCatalog.replace('.fits','.cat')
-        
-        '''
         
         FileCatalog = RemovePath(FileFitsImage)
         
-        FileCatalog = FileCatalog.replace('.fits','.cat')
+        FileCatalog = FileCatalog.replace('.fits','_original.cat')
 
 
         
-        cmd = ['python3','/ocs/commands/ourstars',str(CenterRA),str(CenterDEC),FileCatalog]
+        cmd = ['python3','/ocs/commands/ourstars',str(CenterRA),str(CenterDEC),FileCatalog,prod_dir]
         ExecuteCommand(cfg.catalog_dir+FileCatalog,None,cmd,False)
 
 
+        FileCatalog2 = FileCatalog.replace('_original.cat','.cat')
 
 
         # Generate a Copy of the Catalog removing the first row
-        
-        cmd = ['cp',cfg.catalog_dir+FileCatalog,prod_dir]
-        ExecValue = ExecuteCommand(prod_dir+FileCatalog,None,cmd,False)
+
+
+        cmd = ['cp',prod_dir+FileCatalog,prod_dir]
+        ExecValue = ExecuteCommand(prod_dir+FileCatalog2,None,cmd,False)
 
 
         # Read nstars from the original Catalog
         
-        with open(cfg.catalog_dir+FileCatalog, 'r') as fin:
+        with open(prod_dir+FileCatalog, 'r') as fin:
             data = fin.read().splitlines(True)
             nstars = data[0]
        
         print(" Number of Stars in the Catalog : "+ nstars+"\n")
-        
+
+
+
         if ExecValue == True :
-            with open(prod_dir+FileCatalog, 'w') as fout:
+            with open(prod_dir+FileCatalog2, 'w') as fout:
                 fout.writelines(data[1:])
 
 
@@ -304,10 +295,10 @@ def main():
 
         #  Transform the RA and Dec columns of the catalog from Degrees to arcsec
 
-        FileCatalogTrans = FileCatalog.replace('.cat','_Transformed.cat')
+        FileCatalogTrans = FileCatalog2.replace('.cat','_Transformed.cat')
 
 
-        cmd = [kd3+'transform',prod_dir+FileCatalog,'-x','2','-y','3','-c',str(CenterRA*15),str(CenterDEC)]
+        cmd = [kd3+'transform',prod_dir+FileCatalog2,'-x','2','-y','3','-c',str(CenterRA*15),str(CenterDEC)]
 
         ExecuteCommandFileOut(prod_dir+FileCatalogTrans,cmd)
 
@@ -458,7 +449,7 @@ def main():
 
 
 
-
+        #Get the Reference Point of the maps and the Transformation parameters
         RefpixX,RefpixY,A,B,C,D,E,F = Astrometry.GetRefPoint(lastline,cfg.ccd_field_centre,CenterRA*15,CenterDEC)
 
         date = Astrometry.GetDate()
@@ -500,7 +491,7 @@ def main():
         time2 = time.time()
         duration = time2-time1
         print("The script runs from start to finish in "+str(duration)+" seconds "+"\n")
-        
+
 
 #------------------------------------------------------------------------------
 # Start program execution.
