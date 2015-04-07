@@ -25,18 +25,114 @@ import subprocess
 from scipy.optimize import leastsq
 
 sys.path.append('/ocs/modules')
+import astro
 import cfg
+import image
+import util
+import pyfits
 
 
 #------------------------------------------------------------------------------
 # Implementation of Functions
 #
 
+
+
+#Create Catalog
+
+def ourstars(ra,dec,filename,filedir):
+    
+    
+    if os.path.exists(filedir+filename) == False :
+
+
+        #nx = cfg.ccd_nx         # number of columns in simulated image
+        #ny = cfg.ccd_ny         # number of rows in simulated image
+        binf = 1                # binning factor
+        fwhm = 1
+        resolution = 5          # Number of images per FWHM for star trails
+        band = 'V'              # Default band
+        ra_rate = 0             # Default is untrailed image
+        dec_rate = 0
+        track_length = 0
+        dx = 0
+        dy = 0
+        #ra = args[0]
+        #dec = args[1]
+        #filename = args[2]
+        #filedir  = args[3]
+
+        nadd = int(resolution*track_length/(binf*fwhm))+1      # no of images in track
+        nadd2 = nadd/2
+    
+        nx = int(cfg.ccd_nx/binf)
+        ny = int(cfg.ccd_ny/binf)
+ 
+    
+        # Determine the ra and dec range of image
+        ra0 = astro.deg(ra)
+        #print(ra0*3600)
+        dec0 = astro.deg(dec)
+        #print(dec0*3600)
+        cd = math.cos(math.radians(dec0))
+        #ra_min = ra0-(cd*nx+dx)*binf*cfg.ccd_pixel_size/108000
+        ra_min = ra0-(cd*nx+dx)*binf*cfg.ccd_pixel_size/58800
+        #ra_max = ra0+(cd*nx+dx)*binf*cfg.ccd_pixel_size/108000
+        ra_max = ra0+(cd*nx+dx)*binf*cfg.ccd_pixel_size/58800
+        if (ra_min < 0): ra_min += 24
+        if (ra_max >= 24): ra_max -= 24
+        #print(ra_min*3600)
+        #print(ra_max*3600)
+        dec_min = dec0-(ny+dy)*binf*cfg.ccd_pixel_size/4050
+        dec_max = dec0+(ny+dy)*binf*cfg.ccd_pixel_size/4050
+        #print(dec_min*3600)
+        #print(dec_max*3600)
+    
+        print("Catalog Size arcsec = ra : " +str((ra_max-ra_min)*3600)+" Dec : "+str((dec_max-dec_min)*3600)+"\n")
+    
+        # Determine x and y increments for each image
+        dx /= nadd
+        dy /= nadd
+    
+        # Add stars. The origin is in the SE corner of the image. Dec is
+        # proportional to y and ra is proportional to -x.
+        # First get a list of stars from the USNO catalog.
+        stars = astro.usno(cfg.catalog_dir+'usno185r',ra_min,ra_max,dec_min,dec_max)
+
+    
+        # Print out the Catalog
+        fileout= open(filedir+filename, 'a+')
+    
+        if not stars:
+            print('no stars in range',ra_min,ra_max,dec_min,dec_max)
+            exit(0)
+        else:
+            print(len(stars),'stars')
+            #fileout.write(str(len(stars))+"\n")
+    
+        for star in stars:
+            if band.lower() == 'b':
+                mag = star.b
+            elif band.lower() == 'v':
+                mag = 0.5*star.b+0.5*star.r
+            elif band.lower() == 'r':
+                mag = star.r
+            flux = 10.0**(-0.4*(mag-20))
+            x = nx/2-(star.ra-ra0)*cd*54000/(binf*cfg.ccd_pixel_size)
+            y = ny/2+(star.dec-dec0)*3600/(binf*cfg.ccd_pixel_size)
+        
+            fileout.write('{:4.1f} {:s} {:6.8f} {:s} {:6.8f} {:s}'.format(flux," ",(star.ra)*15," ",star.dec,"\n"))
+
+        else :
+            
+            print(filedir+filename + " already exists"+"\n")
+
+
 # Create doAstrometry Function and call it in ImageAnalyzer.py
 
 def CheckFile(Filename):
     if os.path.exists(Filename) == False :
-             
+        
             Exec = True
             FileName = open(Filename, 'w')
             
@@ -280,36 +376,37 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
 
     #Computing Mean and Standard Deviation for Magnitude, Size, Stat1 and Stat2 Matched Image stars
 
-    for j in range(0, len(Mag_Matched_Image)):
-    
-        if(j < (lenPoint+lenDivide)) :
-        
-            count = count +1
-        
-            Mag_Mean_Val   += Mag_Matched_Image[j]
-            Size_Mean_Val  += Size_Matched_Image[j]
-            Stat1_Mean_Val += Stat1_Matched_Image[j]
-            Stat2_Mean_Val += Stat2_Matched_Image[j]
+
+    for lenpoint in range(0,len(Mag_Matched_Image),lendivide):
+  
+  
+            Mag_Mean_Val =np.mean(Mag_Matched_Image[lenPoint:lenPoint+lenDivide])
+            Size_Mean_Val = np.mean(Size_Matched_Image[lenPoint:lenPoint+lenDivide])
+            Stat1_Mean_Val = np.mean(Stat1_Matched_Image[lenPoint:lenPoint+lenDivide])
+            Stat2_Mean_Val = np.mean(Stat2_Matched_Image[lenPoint:lenPoint+lenDivide])
     
     
-        elif(j ==  (lenPoint+lenDivide)):
+    
         
-            Mag_Mean.append(Mag_Mean_Val/count)
+            Mag_Dev.append(math.sqrt(Std_Mag_Mean_Val/lendivide))
             Mag_Mean_Val = 0
-            Size_Mean.append(Size_Mean_Val/count)
+            Size_Mean.append(math.sqrt(Size_Mean_Val/lendivide))
             Size_Mean_Val = 0
-            Stat1_Mean.append(Stat1_Mean_Val/count)
+            Stat1_Mean.append(math.sqrt(Stat1_Mean_Val/lendivide))
             Stat1_Mean_Val = 0
-            Stat2_Mean.append(Stat2_Mean_Val/count)
+            Stat2_Mean.append(math.sqrt(Stat2_Mean_Val/lendivide))
             Stat2_Mean_Val = 0
         
-
-            Std_Mag_Mean_Val=np.sum((Mag_Matched_Image[lenPoint,lenPoint+lenDivide]-Mag_Mean[Count2])**2)
-            Std_Size_Mean_Val =np.sum((Size_Matched_Image[[lenPoint,lenPoint+lenDivide]-Size_Mean[Count2])**2)
-            Std_Stat1_Mean_Val =np.sum((Stat1_Matched_Image[[lenPoint,lenPoint+lenDivide]-Stat1_Mean[Count2])**2)
-            Std_Stat1_Mean_Val =np.sum((Stat2_Matched_Image[[lenPoint,lenPoint+lenDivide]-Stat2_Mean[Count2])**2)
+            Std_Mag_Mean_Val  = np.sum(math.pow(Mag_Matched_Image[lenPoint:lenPoint+lenDivide]-Mag_Mean[Count2],2))
+            Std_Size_Mean_Val = np.sum(math.pow(Size_Matched_Image[lenPoint:lenPoint+lenDivide]-Size_Mean[Count2],2))
+            Std_Stat1_Mean_Val =np.sum(math.pow(Stat1_Matched_Image[lenPoint,lenPoint+lenDivide]-Stat1_Mean[Count2],2))
+            Std_Stat2_Mean_Val =np.sum(math.pow(Stat2_Matched_Image[lenPoint,lenPoint+lenDivide]-Stat2_Mean[Count2],2))
             
         
+    
+                                                            
+            Mag_Dev.append(math.sqrt(np.mean(math.pow(Mag_Matched_Image[lenPoint:lenPoint+lenDivide]-Mag_Mean[Count2],2))
+                                                                    
             Mag_Dev.append(math.sqrt(Std_Mag_Mean_Val/count))
             Size_Dev.append(math.sqrt(Std_Size_Mean_Val/count))
             Stat1_Dev.append(math.sqrt(Std_Stat1_Mean_Val/count))
@@ -382,7 +479,7 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
 
     return Size_Goodness,Stat1_Goodness,Stat2_Goodness,Size_Good_Stars,Stat1_Good_Stars,Stat2_Good_Stars,Mag_Miss_Stars_Image,Mag_Missing_Image,X_Missing_Image,Y_Missing_Image
 
-
+'''
 
 def MakePlot(ncanvas,ndata,title,FigName,xlab,ylab,invert,x1,y1,x2,y2,x3,y3,show):
     

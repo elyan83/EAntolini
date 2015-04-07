@@ -258,15 +258,13 @@ def main():
         
         FileCatalog = RemovePath(FileFitsImage)
         
-        FileCatalog = FileCatalog.replace('.fits','.cat')
-
-        Astrometry.ourstars(CenterRA,CenterDEC,FileCatalog,prod_dir)
-
-        #cmd = ['python3','/ocs/commands/ourstars',str(CenterRA),str(CenterDEC),FileCatalog,prod_dir]
-        #ExecuteCommand(cfg.catalog_dir+FileCatalog,None,cmd,False)
+        FileCatalog = FileCatalog.replace('.fits','_original.cat')
 
 
-        '''
+        
+        cmd = ['python3','/ocs/commands/ourstars',str(CenterRA),str(CenterDEC),FileCatalog,prod_dir]
+        ExecuteCommand(cfg.catalog_dir+FileCatalog,None,cmd,False)
+
 
         FileCatalog2 = FileCatalog.replace('_original.cat','.cat')
 
@@ -293,14 +291,14 @@ def main():
                 fout.writelines(data[1:])
 
 
-        '''
+
 
         #  Transform the RA and Dec columns of the catalog from Degrees to arcsec
 
-        FileCatalogTrans = FileCatalog.replace('.cat','_Transformed.cat')
+        FileCatalogTrans = FileCatalog2.replace('.cat','_Transformed.cat')
 
 
-        cmd = [kd3+'transform',prod_dir+FileCatalog,'-x','2','-y','3','-c',str(CenterRA*15),str(CenterDEC)]
+        cmd = [kd3+'transform',prod_dir+FileCatalog2,'-x','2','-y','3','-c',str(CenterRA*15),str(CenterDEC)]
 
         ExecuteCommandFileOut(prod_dir+FileCatalogTrans,cmd)
 
@@ -335,7 +333,7 @@ def main():
             subproc.wait()
 
 
-        '''
+
         # Sort the PeakStatObj.txt from brightest to fainter fluxes and write all information in Newfile
 
         X_Image,Y_Image,Flux_Image,Peak_Image,Size_Image,Stat1_Image,Stat2_Image,Npixel_Image = np.loadtxt(FilePeakImage, unpack = True)
@@ -493,7 +491,7 @@ def main():
         time2 = time.time()
         duration = time2-time1
         print("The script runs from start to finish in "+str(duration)+" seconds "+"\n")
-        '''
+
 
 #------------------------------------------------------------------------------
 # Start program execution.
