@@ -230,6 +230,7 @@ def GenBoxImge(FileTriangle,FileCatalog,nx,ny,prod_dir):
 
     return lastline,vertices
 
+'''
 def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat,Y_Trans_Cat,F_Trans_Cat,X_Trans_Image,Y_Trans_Image,Flux_Image,Size_Image,Stat1_Image,Stat2_Image):
 
 
