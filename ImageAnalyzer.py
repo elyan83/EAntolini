@@ -1,4 +1,4 @@
-#!/opt/local/bin/python2.7
+#!/usr/bin/python3
 
 #usage = \
 
@@ -237,7 +237,7 @@ def main():
         
             cmd = base_dir+"imageproc2f"
             
-            print [cmd, FileFitsImage,prod_dir+"PeakStatObj.txt"]
+            print(cmd, FileFitsImage,prod_dir+"PeakStatObj.txt")
         
             execWait = True
             subproc = subprocess.Popen([cmd, FileFitsImage,prod_dir+"PeakStatObj.txt"])
@@ -335,7 +335,7 @@ def main():
             subproc.wait()
 
 
-        '''
+
         # Sort the PeakStatObj.txt from brightest to fainter fluxes and write all information in Newfile
 
         X_Image,Y_Image,Flux_Image,Peak_Image,Size_Image,Stat1_Image,Stat2_Image,Npixel_Image = np.loadtxt(FilePeakImage, unpack = True)
@@ -493,7 +493,7 @@ def main():
         time2 = time.time()
         duration = time2-time1
         print("The script runs from start to finish in "+str(duration)+" seconds "+"\n")
-        '''
+        
 
 #------------------------------------------------------------------------------
 # Start program execution.

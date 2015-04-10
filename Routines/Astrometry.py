@@ -1,4 +1,4 @@
-#!/opt/local/bin/python2.7
+#!/usr/bin/python3
 
 #usage = \
 
@@ -230,7 +230,7 @@ def GenBoxImge(FileTriangle,FileCatalog,nx,ny,prod_dir):
 
     return lastline,vertices
 
-'''
+
 def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat,Y_Trans_Cat,F_Trans_Cat,X_Trans_Image,Y_Trans_Image,Flux_Image,Size_Image,Stat1_Image,Stat2_Image):
 
 
@@ -381,8 +381,8 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
     for lenpoint in range(0,len(Mag_Matched_Image),lendivide):
   
   
-            Mag_Mean_Val =np.mean(Mag_Matched_Image[lenPoint:lenPoint+lenDivide])
-            Size_Mean_Val = np.mean(Size_Matched_Image[lenPoint:lenPoint+lenDivide])
+            Mag_Mean_Val   = np.mean(Mag_Matched_Image[lenPoint:lenPoint+lenDivide])
+            Size_Mean_Val  = np.mean(Size_Matched_Image[lenPoint:lenPoint+lenDivide])
             Stat1_Mean_Val = np.mean(Stat1_Matched_Image[lenPoint:lenPoint+lenDivide])
             Stat2_Mean_Val = np.mean(Stat2_Matched_Image[lenPoint:lenPoint+lenDivide])
     
@@ -408,10 +408,10 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
                                                             
             Mag_Dev.append(math.sqrt(np.mean(math.pow(Mag_Matched_Image[lenPoint:lenPoint+lenDivide]-Mag_Mean[Count2],2))
                                                                     
-            Mag_Dev.append(math.sqrt(Std_Mag_Mean_Val/count))
-            Size_Dev.append(math.sqrt(Std_Size_Mean_Val/count))
-            Stat1_Dev.append(math.sqrt(Std_Stat1_Mean_Val/count))
-            Stat2_Dev.append(math.sqrt(Std_Stat2_Mean_Val/count))
+            Mag_Dev.append(math.sqrt(Std_Mag_Mean_Val/lendivide))
+            Size_Dev.append(math.sqrt(Std_Size_Mean_Val/lendivide))
+            Stat1_Dev.append(math.sqrt(Std_Stat1_Mean_Val/lendivide))
+            Stat2_Dev.append(math.sqrt(Std_Stat2_Mean_Val/lendivide))
         
             Std_Mag_Mean_Val   = 0
             Std_Size_Mean_Val  = 0
@@ -480,7 +480,7 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
 
     return Size_Goodness,Stat1_Goodness,Stat2_Goodness,Size_Good_Stars,Stat1_Good_Stars,Stat2_Good_Stars,Mag_Miss_Stars_Image,Mag_Missing_Image,X_Missing_Image,Y_Missing_Image
 
-'''
+
 
 def MakePlot(ncanvas,ndata,title,FigName,xlab,ylab,invert,x1,y1,x2,y2,x3,y3,show):
     
@@ -649,8 +649,8 @@ def LeastSquareFitComparison(u_Image,v_Image,DeltaU,DeltaV,p):
     tplFinal2,success=leastsq(ErrorFunc2,tplInitial2[:],args=(u_Image,v_Image,DeltaV))
     
     print("Fit Parameters Comparison Done :"+"\n")
-    print "quadratic fit of U and u" ,tplFinal1
-    print "quadratic fit of V and v" ,tplFinal2
+    print("quadratic fit of U and u" ,tplFinal1)
+    print("quadratic fit of V and v" ,tplFinal2)
 
 
 
