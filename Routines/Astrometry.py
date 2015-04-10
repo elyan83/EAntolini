@@ -354,7 +354,7 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
     lenDivide = 50
     #count2  = 0
 
-
+    '''
     Mag_Mean_Val = 0
     Std_Mag_Mean_Val = 0
     Size_Mean_Val = 0
@@ -363,7 +363,7 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
     Std_Stat1_Mean_Val = 0
     Stat2_Mean_Val = 0
     Std_Stat2_Mean_Val = 0
-
+    '''
     Mag_Mean   = array('f')
     Mag_Dev    = array('f')
     Size_Mean  = array('f')
@@ -379,6 +379,12 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
 
 
     for lenpoint in range(0,len(Mag_Matched_Image),lenDivide):
+  
+  
+            Mag_Mean.append(Mag_Mean_Val)
+            Size_Mean.append(Size_Mean_Val)
+            Stat1_Mean.append(Stat1_Mean_Val)
+            Stat2_Mean.append(Stat2_Mean_Val)
   
   
             Mag_Mean_Val   = np.mean(Mag_Matched_Image[lenPoint:lenPoint+lenDivide])
@@ -400,17 +406,18 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
         
             #Std_Mag_Mean_Val  = np.sum(math.pow(Mag_Matched_Image[lenPoint:lenPoint+lenDivide]-Mag_Mean[Count2],2))
             
-            Mag_Dev.append(math.sqrt(np.mean(math.pow(Mag_Matched_Image[lenPoint:lenPoint+lenDivide]-Mag_Mean_Val,2))))
-            Std_Size_Mean_Val.append(math.sqrt(np.mean(math.pow(Size_Matched_Image[lenPoint:lenPoint+lenDivide]-Size_Mean_Val,2))))
-            Std_Stat1_Mean_Val.append(math.sqrt(np.mean(math.pow(Stat1_Matched_Image[lenPoint:lenPoint+lenDivide]-Stat1_Mean_Val,2))))
-            Std_Stat2_Mean_Val.append(math.sqrt(np.mean(math.pow(Stat2_Matched_Image[lenPoint:lenPoint+lenDivide]-Stat2_Mean_Val,2))))
+            Mag_Dev.append(math.sqrt(np.mean(np.power(Mag_Matched_Image[lenPoint:lenPoint+lenDivide]-Mag_Mean_Val,2))))
+            
+            Size_Dev.append(math.sqrt(np.mean(np.power(Size_Matched_Image[lenPoint:lenPoint+lenDivide]-Size_Mean_Val,2))))
+            Stat1_Dev.append(math.sqrt(np.mean(np.power(Stat1_Matched_Image[lenPoint:lenPoint+lenDivide]-Stat1_Mean_Val,2))))
+            Stat2_Dev.append(math.sqrt(np.mean(np.power(Stat2_Matched_Image[lenPoint:lenPoint+lenDivide]-Stat2_Mean_Val,2))))
                                      
             #Std_Size_Mean_Val = np.sum(math.pow(Size_Matched_Image[lenPoint:lenPoint+lenDivide]-Size_Mean[Count2],2))
             #Std_Stat1_Mean_Val =np.sum(math.pow(Stat1_Matched_Image[lenPoint,lenPoint+lenDivide]-Stat1_Mean[Count2],2))
             #Std_Stat2_Mean_Val =np.sum(math.pow(Stat2_Matched_Image[lenPoint,lenPoint+lenDivide]-Stat2_Mean[Count2],2))
             
         
-    
+        
                                                             
             
                                                                     
