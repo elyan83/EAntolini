@@ -348,11 +348,11 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
         FMatchedStars.close()
 
     lenPoint = 0
-    count = 0
+    #count = 0
 
     # Make binning with 50 stars for bin
     lenDivide = 50
-    count2  = 0
+    #count2  = 0
 
 
     Mag_Mean_Val = 0
@@ -378,7 +378,7 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
     #Computing Mean and Standard Deviation for Magnitude, Size, Stat1 and Stat2 Matched Image stars
 
 
-    for lenpoint in range(0,len(Mag_Matched_Image),lendivide):
+    for lenpoint in range(0,len(Mag_Matched_Image),lenDivide):
   
   
             Mag_Mean_Val   = np.mean(Mag_Matched_Image[lenPoint:lenPoint+lenDivide])
@@ -389,39 +389,45 @@ def MatchMissObj(distances,prod_dir,vertices,X_Image_Obj,Y_Image_Obj,X_Trans_Cat
     
     
         
-            Mag_Dev.append(math.sqrt(Std_Mag_Mean_Val/lendivide))
-            Mag_Mean_Val = 0
-            Size_Mean.append(math.sqrt(Size_Mean_Val/lendivide))
-            Size_Mean_Val = 0
-            Stat1_Mean.append(math.sqrt(Stat1_Mean_Val/lendivide))
-            Stat1_Mean_Val = 0
-            Stat2_Mean.append(math.sqrt(Stat2_Mean_Val/lendivide))
-            Stat2_Mean_Val = 0
+            #Mag_Dev.append(math.sqrt(Std_Mag_Mean_Val/lendivide))
+            #Mag_Mean_Val = 0
+            #Size_Mean.append(math.sqrt(Size_Mean_Val/lendivide))
+            #Size_Mean_Val = 0
+            #Stat1_Mean.append(math.sqrt(Stat1_Mean_Val/lendivide))
+            #Stat1_Mean_Val = 0
+            #Stat2_Mean.append(math.sqrt(Stat2_Mean_Val/lendivide))
+            #Stat2_Mean_Val = 0
         
-            Std_Mag_Mean_Val  = np.sum(math.pow(Mag_Matched_Image[lenPoint:lenPoint+lenDivide]-Mag_Mean[Count2],2))
-            Std_Size_Mean_Val = np.sum(math.pow(Size_Matched_Image[lenPoint:lenPoint+lenDivide]-Size_Mean[Count2],2))
-            Std_Stat1_Mean_Val =np.sum(math.pow(Stat1_Matched_Image[lenPoint,lenPoint+lenDivide]-Stat1_Mean[Count2],2))
-            Std_Stat2_Mean_Val =np.sum(math.pow(Stat2_Matched_Image[lenPoint,lenPoint+lenDivide]-Stat2_Mean[Count2],2))
+            #Std_Mag_Mean_Val  = np.sum(math.pow(Mag_Matched_Image[lenPoint:lenPoint+lenDivide]-Mag_Mean[Count2],2))
+            
+            Mag_Dev.append(math.sqrt(np.mean(math.pow(Mag_Matched_Image[lenPoint:lenPoint+lenDivide]-Mag_Mean_Val,2))))
+            Std_Size_Mean_Val.append(math.sqrt(np.mean(math.pow(Size_Matched_Image[lenPoint:lenPoint+lenDivide]-Size_Mean_Val,2))))
+            Std_Stat1_Mean_Val.append(math.sqrt(np.mean(math.pow(Stat1_Matched_Image[lenPoint:lenPoint+lenDivide]-Stat1_Mean_Val,2))))
+            Std_Stat2_Mean_Val.append(math.sqrt(np.mean(math.pow(Stat2_Matched_Image[lenPoint:lenPoint+lenDivide]-Stat2_Mean_Val,2))))
+                                     
+            #Std_Size_Mean_Val = np.sum(math.pow(Size_Matched_Image[lenPoint:lenPoint+lenDivide]-Size_Mean[Count2],2))
+            #Std_Stat1_Mean_Val =np.sum(math.pow(Stat1_Matched_Image[lenPoint,lenPoint+lenDivide]-Stat1_Mean[Count2],2))
+            #Std_Stat2_Mean_Val =np.sum(math.pow(Stat2_Matched_Image[lenPoint,lenPoint+lenDivide]-Stat2_Mean[Count2],2))
             
         
     
                                                             
-            Mag_Dev.append(math.sqrt(np.mean(math.pow(Mag_Matched_Image[lenPoint:lenPoint+lenDivide]-Mag_Mean[Count2],2))
+            
                                                                     
-            Mag_Dev.append(math.sqrt(Std_Mag_Mean_Val/lendivide))
-            Size_Dev.append(math.sqrt(Std_Size_Mean_Val/lendivide))
-            Stat1_Dev.append(math.sqrt(Std_Stat1_Mean_Val/lendivide))
-            Stat2_Dev.append(math.sqrt(Std_Stat2_Mean_Val/lendivide))
+            #Mag_Dev.append(math.sqrt(Std_Mag_Mean_Val/lendivide))
+            #Size_Dev.append(math.sqrt(Std_Size_Mean_Val/lendivide))
+            #Stat1_Dev.append(math.sqrt(Std_Stat1_Mean_Val/lendivide))
+            #Stat2_Dev.append(math.sqrt(Std_Stat2_Mean_Val/lendivide))
         
-            Std_Mag_Mean_Val   = 0
-            Std_Size_Mean_Val  = 0
-            Std_Stat1_Mean_Val = 0
-            Std_Stat2_Mean_Val = 0
+            #Std_Mag_Mean_Val   = 0
+            #Std_Size_Mean_Val  = 0
+            #Std_Stat1_Mean_Val = 0
+            #Std_Stat2_Mean_Val = 0
         
-            count2 = count2+1
+            #count2 = count2+1
         
-            lenPoint = j
-            count = 0
+            #lenPoint = j
+            #count = 0
 
 
 
