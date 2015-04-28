@@ -59,10 +59,10 @@ def main():
     map_dir  = '/Users/Elisa/Documents/Robotic_Telescope/LIGO/Healpix/'
     map_name = 'bayestar.fits'
     
-    # wmap_map_Nested     = hp.read_map(map_dir+map_name, nest=True) #Remains NESTED
+    #wmap_map_Nested     = hp.read_map(map_dir+map_name, nest=True) #Remains NESTED
     wmap_map_Ring       = hp.read_map(map_dir+map_name,0)            #Change  to RING (Default), read the 0 columns of the file
     print(wmap_map_Ring)
-    hp.mollview(wmap_map_Ring,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', min=1e-25,max=1e-6, xsize=4096)
+    hp.mollview(np.log10(wmap_map_Ring),coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', min=-8,max=-6, xsize=4096)
     hp.graticule()
     plt.show()
 
@@ -71,7 +71,7 @@ def main():
     wmap_map_Ring_masked = hp.ma(wmap_map_Ring)
     wmap_map_Ring_masked.mask = np.logical_not(mask)
     wmap_map_Ring_masked_filled = wmap_map_Ring_masked.filled()
-    hp.mollview(wmap_map_Ring_masked.filled(),coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', min=1e-25,max=1e-6, xsize=4096)
+    hp.mollview(wmap_map_Ring_masked.filled(),coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', min=1e-25,max=1e-6, xsize=4096,)
     hp.graticule()
     plt.hist(wmap_map_Ring_masked.compressed(), bins = 4096)
 
