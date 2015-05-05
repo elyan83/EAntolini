@@ -19,10 +19,23 @@ Parameters
 """
 
 import pyfits
+import math as mt
 import numpy as np
 from array import *
 from scipy.io import *
+import healpy as hp
+import matplotlib.pyplot as plt
+import sys
+from pylab import *
 
+
+def IndexToDeclRa(NSIDE,index):
+    
+    theta,phi=hp.pixelfunc.pix2ang(NSIDE,index)
+    return -np.degrees(theta-mt.pi/2.),np.degrees(mt.pi*2.-phi)
+
+def DeclRaToIndex(decl,RA):
+    return hp.pixelfunc.ang2pix(NSIDE,np.radians(-decl+90.),np.radians(360.-RA))
 
 
 
@@ -46,45 +59,38 @@ def main():
     nargs = len(args)
     '''
     
-    filename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSourceRaDecNxNy.txt'
-    outfilename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSourceRaDecNxNy.fits'
-
-    data1 = []
-    data2 = []
-    data3 = []
-    data4 = []
+    filename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.tbl'
+    outfilename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.fits'
     
-    #Open Catalog
-
-    file = open(filename,'r')
-    lines = file.readlines()
-
-
-
-    for line in lines:
-        p = line.split()
-        data1.append(float(p[0]))
-        data2.append(float(p[1]))
-        data3.append(float(p[2]))
-        data4.append(float(p[3]))
+    Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
     
+    print(hp.pix2ang(16, 1440))
     
-    M=[data1,data2,data3,data4]
-
+    print(IndexToDeclRa(16,1440))
+    
+    #print(Name) -> Doesn't work
+    '''
+    M=[Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa]
+    
     #Create Catalog in FITS format
-    
-    c1=pyfits.Column(name='RA',  format='E', array=data1)
-    c2=pyfits.Column(name='DEC', format='E', array=data2)
-    c3=pyfits.Column(name='nx',  format='E', array=data3)
-    c4=pyfits.Column(name='ny',  format='E', array=data4)
+    #c1=pyfits.Column(name='NAME',  format='E', array=Name)
+    #c2=pyfits.Column(name='MORPHOLOGY', format='E', array=Morphology)
+    c3=pyfits.Column(name='RA',  format='E', array=Ra)
+    c4=pyfits.Column(name='DEC', format='E', array=Dec)
+    c5=pyfits.Column(name='r_k20fe',  format='E', array=r_k20fe)
+    c6=pyfits.Column(name='j_m_k20fe',  format='E', array=j_m_k20fe)
+    c7=pyfits.Column(name='k_m_k20fe',  format='E', array=k_m_k20fe)
+    c8=pyfits.Column(name='k_ba',  format='E', array=k_ba)
+    c9=pyfits.Column(name='k_pa',  format='E', array=k_pa)
 
-    cols = pyfits.ColDefs([c1, c2, c3, c4])
+    cols = pyfits.ColDefs([c3, c4,c5,c6,c7,c8,c9])
 
     tbhdu = pyfits.new_table(cols)
     hdu = pyfits.PrimaryHDU(data=M)
     thdulist = pyfits.HDUList([hdu,tbhdu])
     thdulist.writeto(outfilename)
     thdulist.close()
+    '''
 
 #------------------------------------------------------------------------------
 # Start program execution.

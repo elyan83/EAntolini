@@ -20,9 +20,18 @@ Parameters
 
 import numpy as np
 import healpy as hp
+import math as mt
 import matplotlib.pyplot as plt
 import sys
 from pylab import *
+
+def IndexToDeclRa(NSIDE,index):
+    
+    theta,phi=hp.pixelfunc.pix2ang(NSIDE,index)
+    return -np.degrees(theta-mt.pi/2.),np.degrees(mt.pi*2.-phi)
+
+def DeclRaToIndex(decl,RA):
+    return hp.pixelfunc.ang2pix(NSIDE,np.radians(-decl+90.),np.radians(360.-RA))
 
 
 
@@ -46,6 +55,14 @@ def main():
     nargs = len(args)
     '''
     
+    # Read Galaxy Catalog Parameters
+    
+    filename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.tbl'
+    outfilename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.fits'
+    
+    Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
+    
+    
     # Generate my own Map
     
     subplot(221, projection="aitoff")
@@ -61,11 +78,12 @@ def main():
     
     #wmap_map_Nested     = hp.read_map(map_dir+map_name, nest=True) #Remains NESTED
     wmap_map_Ring       = hp.read_map(map_dir+map_name,0)            #Change  to RING (Default), read the 0 columns of the file
-    print(wmap_map_Ring)
+    print(wmap_map_Ring[0])
     hp.mollview(np.log10(wmap_map_Ring),coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', min=-8,max=-6, xsize=4096)
     hp.graticule()
     plt.show()
-
+    
+    '''
     #View map with unseen pixels
     mask = hp.read_map(map_dir+map_name,0).astype(np.bool)
     wmap_map_Ring_masked = hp.ma(wmap_map_Ring)
@@ -76,31 +94,26 @@ def main():
     plt.hist(wmap_map_Ring_masked.compressed(), bins = 4096)
 
     plt.show()
-
-
-
-    ''' This doesn't work'''
     '''
-    nside = 512
-    npix = hp.nside2npix(nside)
-    pix = np.arange(npix)
-    t,p = hp.pix2ang(nside,pix) #theta, phi
 
-    r = hp.Rotator(deg=True, rot=[90, 30])
+    #Get RA and DEC values from LIGO map
 
-    map_rot = np.zeros(npix)
+    LIGO_RA  = array('i')
+    LIGO_DEC = array('i')
 
-    for i in pix:
-        trot, prot = r(t[i],p[i])
-        tpix = int(trot*180./np.pi) #my data came in a theta, phi grid -- this finds its location there
-        ppix = int(prot*180./np.pi)
-        map_rot[i] = wmap_map_Ring_masked_filled[ppix,tpix] #this being the right way round may need double-checking
+    mypixels = np.asarray(np.log10(wmap_map_Ring))
+    print(mypixels[0])
+    
+    print(len(mypixels))
 
+    
+    for i in range(len(mypixels)):
+        ra,dec = IndexToDeclRa(512,int(mypixels[i])*-1)
+        
+        #LIGO_RA.append(int(ra))
+        #LIGO_DEC.append(int(dec))
 
-    map_rot = hp.mollview(wmap_map_Ring_masked.filled(),deg=True,rot=[90,30], return_projected_map=True)
-    #hp.mollview( map_rot,coord='C', title='Histogram equalized Ecliptic', unit='prob', min=1e-25,max=1e-6, xsize=4096)
-
-    '''
+    #print(LIGO_RA," ",LIGO_DEC)
 
 #------------------------------------------------------------------------------
 # Start program execution.
