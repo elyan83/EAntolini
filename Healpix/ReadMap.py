@@ -30,7 +30,7 @@ def IndexToDeclRa(NSIDE,index):
     theta,phi=hp.pixelfunc.pix2ang(NSIDE,index)
     return -np.degrees(theta-mt.pi/2.),np.degrees(mt.pi*2.-phi)
 
-def DeclRaToIndex(decl,RA):
+def DeclRaToIndex(decl,RA,NSIDE):
     return hp.pixelfunc.ang2pix(NSIDE,np.radians(-decl+90.),np.radians(360.-RA))
 
 
@@ -106,7 +106,7 @@ def main():
     print(len(mypixels))
 
     for r, d in zip(Ra,Dec):
-        i=DeclRaToIndex(d,r)
+        i=DeclRaToIndex(d,r,512)
         galpixels[i]=galpixels[i]+1
 
     
@@ -118,11 +118,12 @@ def main():
         #if (r-ra)**2+(d-dec)**2<1:
         #galpixels[i]=galpixels[i]+1
 
-    for g in galpixels:
-        print(g)
+    #for g in galpixels:
+    #print(g)
 
-    hp.mollview(galpixels,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', min=-8,max=-6, xsize=4096)
-
+    hp.mollview(galpixels,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', min=0,max=2, xsize=4096)
+    hp.graticule()
+    plt.show()
 
 #------------------------------------------------------------------------------
 # Start program execution.
