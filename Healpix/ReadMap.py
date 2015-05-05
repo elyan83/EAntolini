@@ -98,22 +98,31 @@ def main():
 
     #Get RA and DEC values from LIGO map
 
-    LIGO_RA  = array('i')
-    LIGO_DEC = array('i')
 
     mypixels = np.asarray(np.log10(wmap_map_Ring))
+    galpixels=0*mypixels
     print(mypixels[0])
     
     print(len(mypixels))
 
-    
-    for i in range(len(mypixels)):
-        ra,dec = IndexToDeclRa(512,int(mypixels[i])*-1)
-        
-        #LIGO_RA.append(int(ra))
-        #LIGO_DEC.append(int(dec))
+    for r, d in zip(Ra,Dec):
+        i=DeclRaToIndex(d,r)
+        galpixels[i]=galpixels[i]+1
 
-    #print(LIGO_RA," ",LIGO_DEC)
+    
+    #for i in range(len(mypixels)):
+        #ra,dec = IndexToDeclRa(512,int(mypixels[i])*-1)
+        #ra,dec = IndexToDeclRa(512,i)
+        # IF there is a galaxy there incremet of 1 mypixels
+        #for r, d in zip(Ra,Dec):
+        #if (r-ra)**2+(d-dec)**2<1:
+        #galpixels[i]=galpixels[i]+1
+
+    for g in galpixels:
+        print(g)
+
+    hp.mollview(galpixels,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', min=-8,max=-6, xsize=4096)
+
 
 #------------------------------------------------------------------------------
 # Start program execution.
