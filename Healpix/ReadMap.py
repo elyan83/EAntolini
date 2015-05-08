@@ -24,6 +24,7 @@ import math as mt
 import matplotlib.pyplot as plt
 import sys
 from pylab import *
+from array import *
 
 def IndexToDeclRa(NSIDE,index):
     
@@ -60,15 +61,16 @@ def main():
     filename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.tbl'
     outfilename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.fits'
     
-    Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
+    Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
     
     
     # Generate my own Map
-    
+    '''
     subplot(221, projection="aitoff")
     title("Aitoff")
     grid(True)
     show()
+    '''
     
     # Open LIGO map
     # By default, input maps are converted to RING ordering, if they are in NESTED ordering.
@@ -78,52 +80,76 @@ def main():
     
     #wmap_map_Nested     = hp.read_map(map_dir+map_name, nest=True) #Remains NESTED
     wmap_map_Ring       = hp.read_map(map_dir+map_name,0)            #Change  to RING (Default), read the 0 columns of the file
-    print(wmap_map_Ring[0])
     hp.mollview(np.log10(wmap_map_Ring),coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', min=-8,max=-6, xsize=4096)
     hp.graticule()
     plt.show()
     
-    '''
-    #View map with unseen pixels
-    mask = hp.read_map(map_dir+map_name,0).astype(np.bool)
-    wmap_map_Ring_masked = hp.ma(wmap_map_Ring)
-    wmap_map_Ring_masked.mask = np.logical_not(mask)
-    wmap_map_Ring_masked_filled = wmap_map_Ring_masked.filled()
-    hp.mollview(wmap_map_Ring_masked.filled(),coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', min=1e-25,max=1e-6, xsize=4096,)
-    hp.graticule()
-    plt.hist(wmap_map_Ring_masked.compressed(), bins = 4096)
-
-    plt.show()
-    '''
 
     #Get RA and DEC values from LIGO map
 
 
     mypixels = np.asarray(np.log10(wmap_map_Ring))
     galpixels=0*mypixels
-    print(mypixels[0])
+ 
     
     print(len(mypixels))
-
+    
+    '''
+    #1) Take RA and DEC from LIGO and convert to Index
     for r, d in zip(Ra,Dec):
         i=DeclRaToIndex(d,r,512)
         galpixels[i]=galpixels[i]+1
+    
+    #1) Take only non zero values
+    
+    with  open('/Users/Elisa/c/EAntolini/Healpix/GalPixels1.txt', 'w') as fGalfile:
+        for i in range(len(galpixels)):
+            if galpixels[i] != 0 :
+                fGalfile.write(str(i)+" "+str(galpixels[i])+"\n")
+    
+    '''
+    
+    '''
+    #2)
+    LIGO_RA=[]
+    LIGO_DEC=[]
 
     
-    #for i in range(len(mypixels)):
-        #ra,dec = IndexToDeclRa(512,int(mypixels[i])*-1)
-        #ra,dec = IndexToDeclRa(512,i)
-        # IF there is a galaxy there incremet of 1 mypixels
-        #for r, d in zip(Ra,Dec):
-        #if (r-ra)**2+(d-dec)**2<1:
-        #galpixels[i]=galpixels[i]+1
+    for i in range(len(mypixels)):
+        ra, dec = IndexToDeclRa(512,i)
+        LIGO_RA.append(ra)
+        LIGO_DEC.append(dec)
+    
 
-    #for g in galpixels:
-    #print(g)
+    
+    #2) Take RA and DEC from GALAXY Catalog and convert to Index
+    for r, d in zip(GAL_RA,GAL_DEC):
+        i=DeclRaToIndex(d,r,512)
+        dist = (r-LIGO_RA)**2+(d-LIGO_DEC)**2
+        galpixels +=np.exp(-dist)
+
+
+    '''
+    
+    
+    #3)
+    for i in range(len(mypixels)):
+        ra,dec = IndexToDeclRa(512,i)
+        dist=(GAL_RA-ra)**2+(GAL_DEC-dec)**2 #-> lenght of this is the number of galaxies I have
+        galpixels[i]=np.sum(np.exp(-dist)) #-> draw a little circle
+    
+    '''
+    with  open('/Users/Elisa/c/EAntolini/Healpix/GalPixels2.txt', 'w') as fGalfile:
+        for g in galpixels:
+            fGalfile.write(str(g)+"\n")
+    
+    '''
 
     hp.mollview(galpixels,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', min=0,max=2, xsize=4096)
     hp.graticule()
     plt.show()
+    #savefig('/Users/Elisa/c/EAntolini/Healpix/GalMap.png')
+
 
 #------------------------------------------------------------------------------
 # Start program execution.
