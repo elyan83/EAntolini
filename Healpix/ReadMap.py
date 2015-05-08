@@ -111,12 +111,12 @@ def main():
     
     
     #2)
-    LIGO_RA=[]
-    LIGO_DEC=[]
+    #LIGO_RA=[]
+    #LIGO_DEC=[]
 
-    
+    '''
     for i in range(len(mypixels)):
-        ra, dec = IndexToDeclRa(512,i)
+        dec, ra = IndexToDeclRa(512,i)
         LIGO_RA.append(ra)
         LIGO_DEC.append(dec)
     
@@ -124,11 +124,14 @@ def main():
     with  open('/Users/Elisa/c/EAntolini/Healpix/LigoRADEC.txt', 'w') as fLigofile:
         for i in range(len(LIGO_RA)):
             fLigofile.write(str(LIGO_RA[i])+" "+str(LIGO_DEC[i])+"\n")
-
+    '''
+    
+    LIGO_DEC,LIGO_RA = np.loadtxt('/Users/Elisa/c/EAntolini/Healpix/LigoRADEC.txt',dtype=[('f0',float),('f1',float)], unpack = True)
 
     #2) Take RA and DEC from GALAXY Catalog and convert to Index
-    for r, d in zip(GAL_RA[0:10],GAL_DEC[0:10]):
+    for r, d in zip(GAL_RA,GAL_DEC):
         #i=DeclRaToIndex(d,r,512)
+        #print ('%g %g' % (r,d))
         dist = (r-LIGO_RA)**2+(d-LIGO_DEC)**2
         galpixels +=np.exp(-dist)
 
