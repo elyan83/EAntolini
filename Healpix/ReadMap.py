@@ -130,11 +130,11 @@ def main():
     LIGO_DEC,LIGO_RA = np.loadtxt('/Users/Elisa/c/EAntolini/Healpix/LigoRADEC.txt',dtype=[('f0',float),('f1',float)], unpack = True)
 
     #2) Take RA and DEC from GALAXY Catalog and convert to Index
-    for r, d, radius in zip(GAL_RA[0:10],GAL_DEC[0:10],r_k20fe):
+    for r, d, radius in zip(GAL_RA,GAL_DEC,r_k20fe):
     #for r, d in zip(GAL_RA,GAL_DEC):
         #Add r_k20fe (arcsec)-> size of the galaxy -> is big if the galaxy is big -> 100,400 big numbers -> M31 600 arcsec -> for now leave in arcsec
         #dist = (r-LIGO_RA)**2+(d-LIGO_DEC)**2 #->
-        dist = ((r-LIGO_RA)**2+(d-LIGO_DEC)**2)/(radius**2)
+        dist = (((r-LIGO_RA)**2+(d-LIGO_DEC)**2)/(radius**2))*1e4
         galpixels +=np.exp(-dist)
 
 
