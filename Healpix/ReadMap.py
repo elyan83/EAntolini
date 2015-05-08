@@ -109,7 +109,7 @@ def main():
     
     '''
     
-    '''
+    
     #2)
     LIGO_RA=[]
     LIGO_DEC=[]
@@ -121,24 +121,27 @@ def main():
         LIGO_DEC.append(dec)
     
 
-    
+    with  open('/Users/Elisa/c/EAntolini/Healpix/LigoRADEC.txt', 'w') as fLigofile:
+        for i in range(len(LIGO_RA)):
+            fLigofile.write(str(LIGO_RA[i])+" "+str(LIGO_DEC[i])+"\n")
+
+
     #2) Take RA and DEC from GALAXY Catalog and convert to Index
-    for r, d in zip(GAL_RA,GAL_DEC):
-        i=DeclRaToIndex(d,r,512)
+    for r, d in zip(GAL_RA[0:10],GAL_DEC[0:10]):
+        #i=DeclRaToIndex(d,r,512)
         dist = (r-LIGO_RA)**2+(d-LIGO_DEC)**2
         galpixels +=np.exp(-dist)
 
 
+
+    
     '''
-    
-    
     #3)
     for i in range(len(mypixels)):
         ra,dec = IndexToDeclRa(512,i)
         dist=(GAL_RA-ra)**2+(GAL_DEC-dec)**2 #-> lenght of this is the number of galaxies I have
         galpixels[i]=np.sum(np.exp(-dist)) #-> draw a little circle
     
-    '''
     with  open('/Users/Elisa/c/EAntolini/Healpix/GalPixels2.txt', 'w') as fGalfile:
         for g in galpixels:
             fGalfile.write(str(g)+"\n")
