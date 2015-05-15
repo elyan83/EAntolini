@@ -94,20 +94,6 @@ def main():
     
     print(len(mypixels))
     
-    '''
-    #1) Take RA and DEC from LIGO and convert to Index
-    for r, d in zip(Ra,Dec):
-        i=DeclRaToIndex(d,r,512)
-        galpixels[i]=galpixels[i]+1
-    
-    #1) Take only non zero values
-    
-    with  open('/Users/Elisa/c/EAntolini/Healpix/GalPixels1.txt', 'w') as fGalfile:
-        for i in range(len(galpixels)):
-            if galpixels[i] != 0 :
-                fGalfile.write(str(i)+" "+str(galpixels[i])+"\n")
-    
-    '''
     
     
     #2)
@@ -127,33 +113,41 @@ def main():
     '''
     
     #Postpone this when run again the for loop
-    LIGO_DEC,LIGO_RA = np.loadtxt('/Users/Elisa/c/EAntolini/Healpix/LigoRADEC.txt',dtype=[('f0',float),('f1',float)], unpack = True)
+    LIGO_RA,LIGO_DEC = np.loadtxt('/Users/Elisa/c/EAntolini/Healpix/LigoRADEC.txt',dtype=[('f0',float),('f1',float)], unpack = True)
 
+
+    '''
     #2) Take RA and DEC from GALAXY Catalog and convert to Index
     for r, d, radius in zip(GAL_RA,GAL_DEC,r_k20fe):
     #for r, d in zip(GAL_RA,GAL_DEC):
         #Add r_k20fe (arcsec)-> size of the galaxy -> is big if the galaxy is big -> 100,400 big numbers -> M31 600 arcsec -> for now leave in arcsec
         #dist = (r-LIGO_RA)**2+(d-LIGO_DEC)**2 #->
+        #pos[0] = (mt.pi/180.0)*GAL_RA;
+        #pos[1] =(mt.pi/180.0)*GAL_DEC;
         dist = (((r-LIGO_RA)**2+(d-LIGO_DEC)**2)/(radius**2))*1e4
         galpixels +=np.exp(-dist)
-
-
-
-    
-    '''
-    #3)
-    for i in range(len(mypixels)):
-        ra,dec = IndexToDeclRa(512,i)
-        dist=(GAL_RA-ra)**2+(GAL_DEC-dec)**2 #-> lenght of this is the number of galaxies I have
-        galpixels[i]=np.sum(np.exp(-dist)) #-> draw a little circle
-    
-    with  open('/Users/Elisa/c/EAntolini/Healpix/GalPixels2.txt', 'w') as fGalfile:
-        for g in galpixels:
-            fGalfile.write(str(g)+"\n")
-    
     '''
 
-    #hp.mollview(galpixels,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', min=0,max=2, xsize=4096)
+    
+    pos = (mt.pi/180.0)
+    
+    cosdec_c= np.cos((LIGO_DEC)*mt.pi/180.0)
+    sindec_c= np.sin((LIGO_DEC)*mt.pi/180.0)
+    cosposra_c = np.cos(pos - (LIGO_RA)*mt.pi/180.0)
+    
+    # distance in radiance of the galaxy from the center
+    dumy=np.arccos(np.cos(pos)*cosdec_c*cosposra_c+np.sin(pos)*sindec_c);
+    #dumx=np.atan2(sin(pos[1])-cos(dumy)*sin(dec_c),cos(pos[1])*sin(pos[0]-ra_c)*cos(dec_c));
+        
+    for r, d, radius in zip(GAL_RA[Name=='M31'],GAL_DEC[Name=='M31'],r_k20fe[Name=='M31']):
+        
+        #dist = (((r-LIGO_RA)**2+(d-LIGO_DEC)**2)/(radius**2))*1e4
+        galpixels +=np.exp(-dumy/radius)
+    
+
+    #print(galpixels)
+
+
     hp.mollview(galpixels,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', xsize=4096)
     hp.graticule()
     plt.show()
