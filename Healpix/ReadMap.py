@@ -58,10 +58,11 @@ def main():
     
     # Read Galaxy Catalog Parameters
     
-    filename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.tbl'
+    filename = '/Users/Elisa/c/EAntolini/Healpix/M31.tbl'
     outfilename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.fits'
     
-    Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
+    #Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
+    Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
     
     
     # Generate my own Map
@@ -117,23 +118,17 @@ def main():
 
 
     pos    = (mt.pi/180.0)
+    cosdec_c= np.cos((LIGO_DEC)*mt.pi/180.0)
+    sindec_c= np.sin((LIGO_DEC)*mt.pi/180.0)
 
     #2) Take RA and DEC from GALAXY Catalog and convert to Index
-    for r, d, radius in zip(GAL_RA[Name=='M31'],GAL_DEC[Name=='M31'],r_k20fe[Name=='M31']):
-    #for r, d in zip(GAL_RA,GAL_DEC):
-        #Add r_k20fe (arcsec)-> size of the galaxy -> is big if the galaxy is big -> 100,400 big numbers -> M31 600 arcsec -> for now leave in arcsec
-        #dist = (r-LIGO_RA)**2+(d-LIGO_DEC)**2 #->
-        #pos[0] = (mt.pi/180.0)*GAL_RA;
-        #pos[1] =(mt.pi/180.0)*GAL_DEC;
-        
-
-        #np.cos(pos*r)
-        #np.cos((r-LIGO_RA)*pos)
+    #for r, d, radius in zip(GAL_RA[Name=='M31'],GAL_DEC[Name=='M31'],r_k20fe[Name=='M31']):
+    
+    for r, d, radius in zip(GAL_RA,GAL_DEC,r_k20fe):
+    
         dumy=np.arccos(np.cos(d*pos)*cosdec_c*np.cos((r-LIGO_RA)*pos)+np.sin(d*pos)*sindec_c)
-        #sindec_c= np.sin((LIGO_DEC)*mt.pi/180.0)
-        #dist = (((r-LIGO_RA)**2+(d-LIGO_DEC)**2)/(radius**2))*1e4
-        #galpixels +=np.exp(-dist)
-        galpixels +=np.exp(-dumy/radius)
+        #galpixels +=np.exp(-dumy/radius)
+        galpixels +=np.exp(-dumy)
     
 
     
