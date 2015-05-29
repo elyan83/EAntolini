@@ -129,22 +129,28 @@ def main():
     
     #for r, d, radius in zip(GAL_RA[Name=='M31'],GAL_DEC[Name=='M31'],r_k20fe[Name=='M31']):
     
-    for r, d,radius, semi_mayor,polar_angle in zip(GAL_RA,GAL_DEC,r_k20fe,k_ba,k_pa):
+    #for r, d,radius, semi_mayor,polar_angle in zip(GAL_RA,GAL_DEC,r_k20fe,k_ba,k_pa):
+    for r, d,semi_mayor,ba,polar_angle in zip(GAL_RA,GAL_DEC,r_k20fe,k_ba,k_pa):
     
         # Distance of the galaxy from the center [radians]
         dumy=np.arccos(np.cos(d*pos)*cosdec_c*np.cos((r-LIGO_RA)*pos)+np.sin(d*pos)*sindec_c)
         
+        dumx+=polar_angle*pos
+        
         # Polar Angle (between East-West directions) [radians]
         dumx=np.arctan2(np.sin(d*pos)-np.cos(dumy)*sindec_c,np.cos(d*pos)*np.sin((r-LIGO_RA)*pos)*cosdec_c);
         
+        semi_minor=ba*semi_mayor
+        
+        
         
         #Compute the semi-minor axes of the Glaxy from Catalog
-        semi_minor = (radius*arcsec_to_radians)*semi_mayor*np.sin(dumx-(polar_angle*pos))/(np.sqrt(np.square(semi_mayor) - np.square(radius*arcsec_to_radians)* np.square(np.cos(dumx - (polar_angle*pos)))))
+        #semi_minor = (radius*arcsec_to_radians)*semi_mayor*np.sin(dumx-(polar_angle*pos))/(np.sqrt(np.square(semi_mayor) - np.square(radius*arcsec_to_radians)* np.square(np.cos(dumx - (polar_angle*pos)))))
     
-        f_dumx = (semi_mayor * semi_minor)/np.sqrt(np.square(semi_minor*np.cos(dumx-(polar_angle*pos)))+np.square(semi_mayor*np.sin(dumx-(polar_angle*pos))))
+        f_dumx = (semi_mayor * semi_minor)/np.sqrt(np.square(semi_minor*np.cos(dumx))+np.square(semi_mayor*np.sin(dumx)))
         #print(f_dumx)
         
-        radius = radius*pos/3600 * f_dumx
+        radius = f_dumx*pos/3600
         
         galpixels +=np.exp(-dumy/radius)
         #galpixels +=np.exp(-dumy/((radius*pos/3600))) #-> Multiply the exponential with some angle with the elliptical formula
