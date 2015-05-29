@@ -60,8 +60,7 @@ def main():
     
     filename = '/Users/Elisa/c/EAntolini/Healpix/M31.tbl'
     outfilename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.fits'
-    
-    #Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
+
     Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
     
     
@@ -100,6 +99,8 @@ def main():
     #2)
     #LIGO_RA=[]
     #LIGO_DEC=[]
+    
+    # Convert Pixels to RA and DEC in LIGO map
 
     '''
     for i in range(len(mypixels)):
@@ -113,47 +114,47 @@ def main():
             fLigofile.write(str(LIGO_RA[i])+" "+str(LIGO_DEC[i])+"\n")
     '''
     
-    #Postpone this when run again the for loop
+    #Load File with M31 and Andromeda (LIGO data set)
+    
     LIGO_RA,LIGO_DEC = np.loadtxt('/Users/Elisa/c/EAntolini/Healpix/LigoRADEC.txt',dtype=[('f0',float),('f1',float)], unpack = True)
 
 
     pos    = (mt.pi/180.0)
-    cosdec_c= np.cos((LIGO_DEC)*mt.pi/180.0)
-    sindec_c= np.sin((LIGO_DEC)*mt.pi/180.0)
+    arcsec_to_radians = 4.84813681e-06
+    cosdec_c= np.cos((LIGO_DEC)*pos) #cos(dec_c) radians
+    sindec_c= np.sin((LIGO_DEC)*pos) #sin(dec_c) radians
+
 
     #2) Take RA and DEC from GALAXY Catalog and convert to Index
+    
     #for r, d, radius in zip(GAL_RA[Name=='M31'],GAL_DEC[Name=='M31'],r_k20fe[Name=='M31']):
     
-    for r, d, radius in zip(GAL_RA,GAL_DEC,r_k20fe):
+    for r, d,radius, semi_mayor,polar_angle in zip(GAL_RA,GAL_DEC,r_k20fe,k_ba,k_pa):
     
+        # Distance of the galaxy from the center [radians]
         dumy=np.arccos(np.cos(d*pos)*cosdec_c*np.cos((r-LIGO_RA)*pos)+np.sin(d*pos)*sindec_c)
-        #galpixels +=np.exp(-dumy/radius)
-        galpixels +=np.exp(-dumy)
-    
-
-    
-    '''
-    cosdec_c= np.cos((LIGO_DEC)*mt.pi/180.0)
-    sindec_c= np.sin((LIGO_DEC)*mt.pi/180.0)
-    cosposra_c = np.cos(pos - (LIGO_RA)*mt.pi/180.0)
-    
-    # distance in radiance of the galaxy from the center
-    dumy=np.arccos(np.cos(pos)*cosdec_c*cosposra_c+np.sin(pos)*sindec_c);
-    #dumx=np.atan2(sin(pos[1])-cos(dumy)*sin(dec_c),cos(pos[1])*sin(pos[0]-ra_c)*cos(dec_c));
         
-    for r, d, radius in zip(GAL_RA[Name=='M31'],GAL_DEC[Name=='M31'],r_k20fe[Name=='M31']):
+        # Polar Angle (between East-West directions) [radians]
+        dumx=np.arctan2(np.sin(d*pos)-np.cos(dumy)*sindec_c,np.cos(d*pos)*np.sin((r-LIGO_RA)*pos)*cosdec_c);
         
-        #dist = (((r-LIGO_RA)**2+(d-LIGO_DEC)**2)/(radius**2))*1e4
+        
+        #Compute the semi-minor axes of the Glaxy from Catalog
+        semi_minor = (radius*arcsec_to_radians)*semi_mayor*np.sin(dumx-(polar_angle*pos))/(np.sqrt(np.square(semi_mayor) - np.square(radius*arcsec_to_radians)* np.square(np.cos(dumx - (polar_angle*pos)))))
+    
+        f_dumx = (semi_mayor * semi_minor)/np.sqrt(np.square(semi_minor*np.cos(dumx-(polar_angle*pos)))+np.square(semi_mayor*np.sin(dumx-(polar_angle*pos))))
+        #print(f_dumx)
+        
+        radius = radius*pos/3600 * f_dumx
+        
         galpixels +=np.exp(-dumy/radius)
+        #galpixels +=np.exp(-dumy/((radius*pos/3600))) #-> Multiply the exponential with some angle with the elliptical formula
     
 
-    #print(galpixels)
-    '''
 
     hp.mollview(galpixels,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', xsize=4096)
     hp.graticule()
     plt.show()
-    #savefig('/Users/Elisa/c/EAntolini/Healpix/GalMap.png')
+
 
 
 #------------------------------------------------------------------------------
