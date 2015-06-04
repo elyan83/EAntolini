@@ -59,22 +59,44 @@ def main():
     nargs = len(args)
     '''
     
-    filename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.tbl'
-    outfilename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.fits'
+    filename = '/Users/Elisa/c/EAntolini/Healpix/2MASSNearbyGalpro.txt'
+    outfilename = '/Users/Elisa/c/EAntolini/Healpix/2MASSNearbyGal.fits'
     
-    Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
+    #recordtype = dtype(['|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float])
     
-    print(hp.pix2ang(16, 1440))
+    Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype={'names':('s0', 's1', 'f2', 'f3','f4','f5','f6','f7','f8'),'formats':('|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float)} , unpack = True)
     
-    print(IndexToDeclRa(16,1440))
+    #print(hp.pix2ang(16, 1440))
     
-    #print(Name) -> Doesn't work
-    '''
-    M=[Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa]
+
+    #print(IndexToDeclRa(16,1440))
+    
+    Prova = np.ndarray.tostring(Name)
+    Prova2 = Prova.decode()
+    str1 = ''.join(Prova2)
+    str2 = [str1.replace('\x00\x00\x00\x00\x00\x00\x00\x00', ' ') for s in str1]
+    str3 = [str1.replace('\x00\x00\x00', ' ') for s in str1]
+    str4 = [str1.replace('\x00\x00', ' ') for s in str1]
+    str5 = [str1.replace('\x00', ' ') for s in str1]
+    #str2 = [str2.replace('\x00\x00\x00', ' ') for s in str2]
+    
+    #Prova3 = Prova2.split('\x00\x00\x00\x00\x00\x00\x00\x00')
+    str6 = ''.join(str5)
+    #Prova4 = Prova3.split('\x00\x00')
+    str7 = str6.split(' ')
+
+    #index = [ s.index('') for s in str7]
+    
+    str8 = [x for x in str7 if x != '']
+    print(type(str8))
+    
+
+    M=[str8,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa]
     
     #Create Catalog in FITS format
-    #c1=pyfits.Column(name='NAME',  format='E', array=Name)
-    #c2=pyfits.Column(name='MORPHOLOGY', format='E', array=Morphology)
+    c1=pyfits.Column(name='NAME',  format='A1000', array=str8)
+    #c2=pyfits.Column(name='MORPHOLOGY', format='A1000', array=Morphology)
+    
     c3=pyfits.Column(name='RA',  format='E', array=Ra)
     c4=pyfits.Column(name='DEC', format='E', array=Dec)
     c5=pyfits.Column(name='r_k20fe',  format='E', array=r_k20fe)
@@ -83,14 +105,15 @@ def main():
     c8=pyfits.Column(name='k_ba',  format='E', array=k_ba)
     c9=pyfits.Column(name='k_pa',  format='E', array=k_pa)
 
-    cols = pyfits.ColDefs([c3, c4,c5,c6,c7,c8,c9])
-
+    cols = pyfits.ColDefs([c1,c3, c4,c5,c6,c7,c8,c9])
+    
     tbhdu = pyfits.new_table(cols)
-    hdu = pyfits.PrimaryHDU(data=M)
-    thdulist = pyfits.HDUList([hdu,tbhdu])
-    thdulist.writeto(outfilename)
-    thdulist.close()
-    '''
+    #print(M)
+    #hdu = pyfits.PrimaryHDU(data=M)
+    #thdulist = pyfits.HDUList([hdu,tbhdu])
+    #thdulist.writeto(outfilename)
+    #thdulist.close()
+
 
 #------------------------------------------------------------------------------
 # Start program execution.

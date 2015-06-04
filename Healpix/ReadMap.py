@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 import sys
 from pylab import *
 from array import *
+import pyfits
 
 def IndexToDeclRa(NSIDE,index):
     
@@ -58,11 +59,16 @@ def main():
     
     # Read Galaxy Catalog Parameters
     
-    filename = '/Users/Elisa/c/EAntolini/Healpix/M31.tbl'
+    filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/M31.tbl'
     outfilename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.fits'
 
-    Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
+    Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filenameCat1,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
     
+    # Get Distances Km/s
+    Velocity = 0.0
+    Hubble Constant = 67.0 #[km/s/Mpc]
+    
+    distance = Velocity/Hubble Constant #Mpc
     
     # Generate my own Map
     '''
@@ -130,30 +136,30 @@ def main():
     #for r, d, radius in zip(GAL_RA[Name=='M31'],GAL_DEC[Name=='M31'],r_k20fe[Name=='M31']):
     
     #for r, d,radius, semi_mayor,polar_angle in zip(GAL_RA,GAL_DEC,r_k20fe,k_ba,k_pa):
-    for r, d,semi_mayor,ba,polar_angle in zip(GAL_RA,GAL_DEC,r_k20fe,k_ba,k_pa):
+    for r, d,semi_mayor,K_mag,ba,polar_angle in zip(GAL_RA,GAL_DEC,r_k20fe,k_m_k20fe,k_ba,k_pa):
     
         # Distance of the galaxy from the center [radians]
         dumy=np.arccos(np.cos(d*pos)*cosdec_c*np.cos((r-LIGO_RA)*pos)+np.sin(d*pos)*sindec_c)
         
-        dumx+=polar_angle*pos
         
-        # Polar Angle (between East-West directions) [radians]
+        # Polar Angle (between North-South directions) [radians]
         dumx=np.arctan2(np.sin(d*pos)-np.cos(dumy)*sindec_c,np.cos(d*pos)*np.sin((r-LIGO_RA)*pos)*cosdec_c);
+        
+        dumx +=(polar_angle+90)*pos
         
         semi_minor=ba*semi_mayor
         
         
-        
         #Compute the semi-minor axes of the Glaxy from Catalog
-        #semi_minor = (radius*arcsec_to_radians)*semi_mayor*np.sin(dumx-(polar_angle*pos))/(np.sqrt(np.square(semi_mayor) - np.square(radius*arcsec_to_radians)* np.square(np.cos(dumx - (polar_angle*pos)))))
     
         f_dumx = (semi_mayor * semi_minor)/np.sqrt(np.square(semi_minor*np.cos(dumx))+np.square(semi_mayor*np.sin(dumx)))
-        #print(f_dumx)
+        
+        LumK=10**(-0.4*K_mag)*4*mt.pi*np.square(distance)
         
         radius = f_dumx*pos/3600
         
-        galpixels +=np.exp(-dumy/radius)
-        #galpixels +=np.exp(-dumy/((radius*pos/3600))) #-> Multiply the exponential with some angle with the elliptical formula
+        #galpixels +=np.exp(-dumy/radius)
+       galpixels += LumK/(semi_mayor * semi_minor)*np.exp(-dumy/radius)
     
 
 
