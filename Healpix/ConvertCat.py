@@ -59,17 +59,45 @@ def main():
     nargs = len(args)
     '''
     
-    filename = '/Users/Elisa/c/EAntolini/Healpix/2MASSNearbyGalpro.txt'
-    outfilename = '/Users/Elisa/c/EAntolini/Healpix/2MASSNearbyGal.fits'
+    filename = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASSNearbyGal.txt'
+    outfilename = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASSNearbyGal.fits'
     
     #recordtype = dtype(['|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float])
     
-    Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype={'names':('s0', 's1', 'f2', 'f3','f4','f5','f6','f7','f8'),'formats':('|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float)} , unpack = True)
+    #Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype={'names':('s0', 's1', 'f2', 'f3','f4','f5','f6','f7','f8'),'formats':('|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float)} , unpack = True)
     
-    #print(hp.pix2ang(16, 1440))
+    Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,dtype={'names':('s0', 's1', 'f2', 'f3','f4','f5','f6','f7','f8'),'formats':('|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float)} , unpack = True)
     
+    '''
+    
+    infile = open(filename,'r')
+    
+    newopen = open(outfilename, 'w')
+    
+    for line in infile :
+    
+        if 'null' in line:
+            line = line.replace('.' , '')
+        # Planetary Nebula
+        elif 'PN' in line:
+            line = line.replace('.', '')
+        # Globular Cluster
+        elif 'GC' in line:
+            line = line.replace('.', '')
+        # Supernova Remnant
+        elif 'SNR' in line:
+            line = line.replace('.', '')
+        # Dwarf
+        elif 'Dwarf' in line:
+            line = line.replace('.', '')
+        else:
+            newopen.write(line)
 
-    #print(IndexToDeclRa(16,1440))
+    newopen.close()
+    
+    '''
+
+    '''
     
     Prova = np.ndarray.tostring(Name)
     Prova2 = Prova.decode()
@@ -90,11 +118,11 @@ def main():
     str8 = [x for x in str7 if x != '']
     print(type(str8))
     
-
-    M=[str8,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa]
+    '''
+    M=[Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa]
     
     #Create Catalog in FITS format
-    c1=pyfits.Column(name='NAME',  format='A1000', array=str8)
+    #c1=pyfits.Column(name='NAME',  format='A1000', array=str8)
     #c2=pyfits.Column(name='MORPHOLOGY', format='A1000', array=Morphology)
     
     c3=pyfits.Column(name='RA',  format='E', array=Ra)
@@ -105,14 +133,14 @@ def main():
     c8=pyfits.Column(name='k_ba',  format='E', array=k_ba)
     c9=pyfits.Column(name='k_pa',  format='E', array=k_pa)
 
-    cols = pyfits.ColDefs([c1,c3, c4,c5,c6,c7,c8,c9])
+    cols = pyfits.ColDefs([c3, c4,c5,c6,c7,c8,c9])
     
     tbhdu = pyfits.new_table(cols)
-    #print(M)
-    #hdu = pyfits.PrimaryHDU(data=M)
-    #thdulist = pyfits.HDUList([hdu,tbhdu])
-    #thdulist.writeto(outfilename)
-    #thdulist.close()
+    print(M)
+    hdu = pyfits.PrimaryHDU(data=M)
+    thdulist = pyfits.HDUList([hdu,tbhdu])
+    thdulist.writeto(outfilename)
+    thdulist.close()
 
 
 #------------------------------------------------------------------------------

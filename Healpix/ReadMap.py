@@ -62,13 +62,10 @@ def main():
     filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/M31.tbl'
     outfilename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.fits'
 
-    Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filenameCat1,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
+    Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa,distance = np.loadtxt(filenameCat1,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float),('f9',float)], unpack = True)
     
-    # Get Distances Km/s
-    Velocity = 0.0
-    Hubble Constant = 67.0 #[km/s/Mpc]
-    
-    distance = Velocity/Hubble Constant #Mpc
+
+    Hubble_Constant = 75.0 #[km/s/Mpc]
     
     # Generate my own Map
     '''
@@ -147,20 +144,32 @@ def main():
         
         dumx +=(polar_angle+90)*pos
         
+        '''
+        dumx -=(polar_angle+90)*pos
+        dumx +=(90-polar_angle)*pos
+        dumx -=(90-polar_angle)*pos
+        '''
+        
         semi_minor=ba*semi_mayor
         
         
         #Compute the semi-minor axes of the Glaxy from Catalog
+  
     
         f_dumx = (semi_mayor * semi_minor)/np.sqrt(np.square(semi_minor*np.cos(dumx))+np.square(semi_mayor*np.sin(dumx)))
         
-        LumK=10**(-0.4*K_mag)*4*mt.pi*np.square(distance)
+        
+        LumK = np.power(10,(-0.4*(K_mag-5*np.log10(distance*1e5)-6.35))) # lUMINOSTY OF THE GALAXY IN SOLAR LUMINOSITY
         
         radius = f_dumx*pos/3600
-        
-        #galpixels +=np.exp(-dumy/radius)
-       galpixels += LumK/(semi_mayor * semi_minor)*np.exp(-dumy/radius)
     
+    
+    
+    
+        galpixels += (LumK/(semi_mayor * semi_minor))*np.exp(-dumy/radius)
+    
+
+
 
 
     hp.mollview(galpixels,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', xsize=4096)
