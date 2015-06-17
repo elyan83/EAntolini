@@ -59,10 +59,12 @@ def main():
     
     # Read Galaxy Catalog Parameters
     
-    filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/M31.tbl'
+    filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/Match_2MASS_Tully_t1.txt'
     outfilename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.fits'
 
-    Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa,distance = np.loadtxt(filenameCat1,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float),('f9',float)], unpack = True)
+    #Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa,distance = np.loadtxt(filenameCat1,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float),('f9',float)], unpack = True)
+    
+    GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa, vel, distance = np.loadtxt(filenameCat1,dtype=[('f0',float),('f1',float),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
     
 
     Hubble_Constant = 75.0 #[km/s/Mpc]
@@ -133,7 +135,7 @@ def main():
     #for r, d, radius in zip(GAL_RA[Name=='M31'],GAL_DEC[Name=='M31'],r_k20fe[Name=='M31']):
     
     #for r, d,radius, semi_mayor,polar_angle in zip(GAL_RA,GAL_DEC,r_k20fe,k_ba,k_pa):
-    for r, d,semi_mayor,K_mag,ba,polar_angle in zip(GAL_RA,GAL_DEC,r_k20fe,k_m_k20fe,k_ba,k_pa):
+    for r, d,semi_mayor,K_mag,ba,polar_angle,dist in zip(GAL_RA,GAL_DEC,r_k20fe,k_m_k20fe,k_ba,k_pa,distance):
     
         # Distance of the galaxy from the center [radians]
         dumy=np.arccos(np.cos(d*pos)*cosdec_c*np.cos((r-LIGO_RA)*pos)+np.sin(d*pos)*sindec_c)
@@ -159,14 +161,15 @@ def main():
         f_dumx = (semi_mayor * semi_minor)/np.sqrt(np.square(semi_minor*np.cos(dumx))+np.square(semi_mayor*np.sin(dumx)))
         
         
-        LumK = np.power(10,(-0.4*(K_mag-5*np.log10(distance*1e5)-6.35))) # lUMINOSTY OF THE GALAXY IN SOLAR LUMINOSITY
+        LumK = np.power(10,(-0.4*(K_mag-5*np.log10(dist*1e5)-6.35))) # lUMINOSTY OF THE GALAXY IN SOLAR LUMINOSITY
         
         radius = f_dumx*pos/3600
     
     
+        galpixels += np.exp(-dumy/radius)
     
-    
-        galpixels += (LumK/(semi_mayor * semi_minor))*np.exp(-dumy/radius)
+        #galpixels += (LumK/(semi_mayor * semi_minor))*np.exp(-dumy/radius)
+        #galpixels += (1/(semi_mayor * semi_minor))*np.exp(-dumy/radius)
     
 
 

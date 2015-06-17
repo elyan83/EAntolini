@@ -27,6 +27,7 @@ import healpy as hp
 import matplotlib.pyplot as plt
 import sys
 from pylab import *
+import binascii
 
 
 def IndexToDeclRa(NSIDE,index):
@@ -59,45 +60,43 @@ def main():
     nargs = len(args)
     '''
     
-    filename = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASSNearbyGal.txt'
-    outfilename = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASSNearbyGal.fits'
+    filename = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASSNearbyGalClean.txt'
+    #filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.tbl'
+    outfilename = '/Users/Elisa/c/EAntolini/Healpix/2MASSNearbyGalClean.fits'
     
     #recordtype = dtype(['|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float])
     
-    #Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype={'names':('s0', 's1', 'f2', 'f3','f4','f5','f6','f7','f8'),'formats':('|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float)} , unpack = True)
+    #Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filenameCat1,skiprows=174,dtype={'names':('s0', 's1', 'f2', 'f3','f4','f5','f6','f7','f8'),'formats':('|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float)} , unpack = True)
     
     Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,dtype={'names':('s0', 's1', 'f2', 'f3','f4','f5','f6','f7','f8'),'formats':('|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float)} , unpack = True)
     
-    '''
     
-    infile = open(filename,'r')
-    
-    newopen = open(outfilename, 'w')
-    
-    for line in infile :
-    
-        if 'null' in line:
-            line = line.replace('.' , '')
-        # Planetary Nebula
-        elif 'PN' in line:
-            line = line.replace('.', '')
-        # Globular Cluster
-        elif 'GC' in line:
-            line = line.replace('.', '')
-        # Supernova Remnant
-        elif 'SNR' in line:
-            line = line.replace('.', '')
-        # Dwarf
-        elif 'Dwarf' in line:
-            line = line.replace('.', '')
-        else:
-            newopen.write(line)
-
-    newopen.close()
-    
+    #Name,Morphology,RA,DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filenameCat1,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float),('f9',float)], unpack = True)
     '''
 
-    '''
+    newfile = open(outfilename, 'w')
+    
+    c = 0
+
+    
+    for i in range(len(Ra)):
+        
+        if   Morphology[i] != b'null' and Morphology[i] != b'PN' and Morphology[i] != b'GC' and Morphology[i] != b'SNR' :
+            print(Morphology[i])
+            
+            name = str(Name[i])
+            morph = str(Morphology[i])
+            newfile.write(name.replace("b'","")+"    "+morph.replace("b'","")+"     "+str(Ra[i])+" "+str(Dec[i])+" "+str(r_k20fe[i])+" "+str(j_m_k20fe[i])+" "+str(k_m_k20fe[i])+" "+str(k_ba[i])+" "+str(k_pa[i])+"\n")
+    
+        else :
+            c = c+1
+ 
+
+
+    print(c)
+    newfile.close();
+
+
     
     Prova = np.ndarray.tostring(Name)
     Prova2 = Prova.decode()
@@ -118,6 +117,7 @@ def main():
     str8 = [x for x in str7 if x != '']
     print(type(str8))
     
+    
     '''
     M=[Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa]
     
@@ -135,13 +135,14 @@ def main():
 
     cols = pyfits.ColDefs([c3, c4,c5,c6,c7,c8,c9])
     
+    
     tbhdu = pyfits.new_table(cols)
     print(M)
     hdu = pyfits.PrimaryHDU(data=M)
     thdulist = pyfits.HDUList([hdu,tbhdu])
     thdulist.writeto(outfilename)
     thdulist.close()
-
+    
 
 #------------------------------------------------------------------------------
 # Start program execution.
