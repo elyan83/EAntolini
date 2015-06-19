@@ -60,44 +60,45 @@ def main():
     nargs = len(args)
     '''
     
-    filename = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASSNearbyGalClean.txt'
-    #filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.tbl'
-    outfilename = '/Users/Elisa/c/EAntolini/Healpix/2MASSNearbyGalClean.fits'
+    #filename = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASSComplete_Hmag.tbl'
+    filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASS_Tully_NED_completed.txt'
+    outfilename = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASS_Tully_NED_completed.fits'
     
     #recordtype = dtype(['|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float])
     
     #Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filenameCat1,skiprows=174,dtype={'names':('s0', 's1', 'f2', 'f3','f4','f5','f6','f7','f8'),'formats':('|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float)} , unpack = True)
     
-    Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,dtype={'names':('s0', 's1', 'f2', 'f3','f4','f5','f6','f7','f8'),'formats':('|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float)} , unpack = True)
+    #Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,h_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype={'names':('s0', 's1', 'f2', 'f3','f4','f5','f6','f7','f8','f9'),'formats':('|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float,np.float)} , unpack = True)
     
     
-    #Name,Morphology,RA,DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filenameCat1,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float),('f9',float)], unpack = True)
+    RA,DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa,vel,distance = np.loadtxt(filenameCat1,dtype=[('f0',float),('f1',float),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
+    
     '''
-
     newfile = open(outfilename, 'w')
     
     c = 0
-
     
-    for i in range(len(Ra)):
+    
+    for i in range(len(RA)):
         
-        if   Morphology[i] != b'null' and Morphology[i] != b'PN' and Morphology[i] != b'GC' and Morphology[i] != b'SNR' :
-            print(Morphology[i])
+        # if   Morphology[i] != b'null' and Morphology[i] != b'PN' and Morphology[i] != b'GC' and Morphology[i] != b'SNR' :
+        if   H_mag[i] != 0.0 :
+            #print(str(Name[i]))
             
-            name = str(Name[i])
-            morph = str(Morphology[i])
-            newfile.write(name.replace("b'","")+"    "+morph.replace("b'","")+"     "+str(Ra[i])+" "+str(Dec[i])+" "+str(r_k20fe[i])+" "+str(j_m_k20fe[i])+" "+str(k_m_k20fe[i])+" "+str(k_ba[i])+" "+str(k_pa[i])+"\n")
+            #name = str(Name[i])
+            #morph = str(Morphology[i])
+            newfile.write(str(RA[i])+" "+str(DEC[i])+" "+str(distance[i])+" "+str(H_mag[i])+"\n")
     
         else :
             c = c+1
  
-
+ 
 
     print(c)
     newfile.close();
 
 
-    
+
     Prova = np.ndarray.tostring(Name)
     Prova2 = Prova.decode()
     str1 = ''.join(Prova2)
@@ -119,21 +120,26 @@ def main():
     
     
     '''
-    M=[Ra,Dec,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa]
+    
+    #M=[Ra,Dec,r_k20fe,j_m_k20fe,h_m_k20fe,k_m_k20fe,k_ba,k_pa]
+    M=[RA,DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa,vel,distance]
     
     #Create Catalog in FITS format
     #c1=pyfits.Column(name='NAME',  format='A1000', array=str8)
     #c2=pyfits.Column(name='MORPHOLOGY', format='A1000', array=Morphology)
     
-    c3=pyfits.Column(name='RA',  format='E', array=Ra)
-    c4=pyfits.Column(name='DEC', format='E', array=Dec)
-    c5=pyfits.Column(name='r_k20fe',  format='E', array=r_k20fe)
-    c6=pyfits.Column(name='j_m_k20fe',  format='E', array=j_m_k20fe)
+    c3=pyfits.Column(name='RA',  format='E', array=RA)
+    c4=pyfits.Column(name='DEC', format='E', array=DEC)
+    c5=pyfits.Column(name='r_k20fe',  format='E', array = r_k20fe)
+    c6=pyfits.Column(name='j_m_k20fe',  format='E', array = j_m_k20fe)
     c7=pyfits.Column(name='k_m_k20fe',  format='E', array=k_m_k20fe)
     c8=pyfits.Column(name='k_ba',  format='E', array=k_ba)
     c9=pyfits.Column(name='k_pa',  format='E', array=k_pa)
+    c10=pyfits.Column(name='vel',  format='E', array=vel)
+    c11=pyfits.Column(name='distance',  format='E', array=distance)
+   
 
-    cols = pyfits.ColDefs([c3, c4,c5,c6,c7,c8,c9])
+    cols = pyfits.ColDefs([c3, c4,c5,c6,c7,c8,c9,c10,c11])
     
     
     tbhdu = pyfits.new_table(cols)
@@ -142,7 +148,7 @@ def main():
     thdulist = pyfits.HDUList([hdu,tbhdu])
     thdulist.writeto(outfilename)
     thdulist.close()
-    
+
 
 #------------------------------------------------------------------------------
 # Start program execution.

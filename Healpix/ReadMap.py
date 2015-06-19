@@ -59,7 +59,7 @@ def main():
     
     # Read Galaxy Catalog Parameters
     
-    filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/Match_2MASS_Tully_t1.txt'
+    filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASS_Tully_NED_completed.txt'
     outfilename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.fits'
 
     #Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa,distance = np.loadtxt(filenameCat1,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float),('f9',float)], unpack = True)
@@ -165,17 +165,19 @@ def main():
         
         radius = f_dumx*pos/3600
     
+        #Utilizzare dumy se non ho tutte le distanze delle galassie
+        # Quando ho tutte le galassie posso usare Lumk
     
-        galpixels += np.exp(-dumy/radius)
+        #galpixels += np.exp(-dumy/radius)
     
-        #galpixels += (LumK/(semi_mayor * semi_minor))*np.exp(-dumy/radius)
+        galpixels += (LumK/(semi_mayor * semi_minor))*np.exp(-dumy/radius)
         #galpixels += (1/(semi_mayor * semi_minor))*np.exp(-dumy/radius)
     
 
 
 
-
-    hp.mollview(galpixels,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', xsize=4096)
+    hp.mollview(np.log10(galpixels),coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', xsize=4096)
+    #hp.mollview(galpixels,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob', xsize=4096)
     hp.graticule()
     plt.show()
 
