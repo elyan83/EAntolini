@@ -59,15 +59,23 @@ def main():
     
     # Read Galaxy Catalog Parameters
     
-    filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASS_Tully_NED_completed.txt'
+    filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/Complete/Tully_Magnitude_Completed_shape.txt'
     outfilename = '/Users/Elisa/c/EAntolini/Healpix/IpacTableFromSource.fits'
 
     #Name,Morphology,GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa,distance = np.loadtxt(filenameCat1,dtype=[('f0',str),('f1',str),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float),('f9',float)], unpack = True)
     
-    GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa, vel, distance = np.loadtxt(filenameCat1,dtype=[('f0',float),('f1',float),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
+    # 2MASS MAP
+    #GAL_RA,GAL_DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa, vel, distance = np.loadtxt(filenameCat1,dtype=[('f0',float),('f1',float),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
     
-
-    Hubble_Constant = 75.0 #[km/s/Mpc]
+    #TULLY MAP 1794
+    RA,DEC,radius,frac_diameter,distance,mag,incl= np.loadtxt(filenameCat1,dtype=[('f0',float),('f1',float),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float)], unpack = True)
+    
+    GAL_RA = RA
+    GAL_DEC =DEC
+    r_k20fe = radius
+    k_ba   = frac_diameter
+    k_pa   = np.cos(np.absolute(incl-3)) #degree
+    k_m_k20fe = mag
     
     # Generate my own Map
     '''
@@ -135,7 +143,15 @@ def main():
     #for r, d, radius in zip(GAL_RA[Name=='M31'],GAL_DEC[Name=='M31'],r_k20fe[Name=='M31']):
     
     #for r, d,radius, semi_mayor,polar_angle in zip(GAL_RA,GAL_DEC,r_k20fe,k_ba,k_pa):
+    
+    #2MASS
+    #for r, d,semi_mayor,K_mag,ba,polar_angle,dist in zip(GAL_RA,GAL_DEC,r_k20fe,k_m_k20fe,k_ba,k_pa,distance):
+    
+    #Tully
     for r, d,semi_mayor,K_mag,ba,polar_angle,dist in zip(GAL_RA,GAL_DEC,r_k20fe,k_m_k20fe,k_ba,k_pa,distance):
+
+
+        #polar_angle = 0
     
         # Distance of the galaxy from the center [radians]
         dumy=np.arccos(np.cos(d*pos)*cosdec_c*np.cos((r-LIGO_RA)*pos)+np.sin(d*pos)*sindec_c)

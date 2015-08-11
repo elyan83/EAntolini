@@ -61,8 +61,9 @@ def main():
     '''
     
     #filename = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASSComplete_Hmag.tbl'
-    filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASS_Tully_NED_completed.txt'
-    outfilename = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASS_Tully_NED_completed.fits'
+    filenameCat1 = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASSUpdated/PA4444.txt'
+    filenameCat2 = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASSUpdated/Tully3000.txt'
+    outfilename = '/Users/Elisa/c/EAntolini/Healpix/Catalogs/2MASSUpdated/Tully_3000and4444.txt'
     
     #recordtype = dtype(['|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float])
     
@@ -71,34 +72,40 @@ def main():
     #Name,Morphology,Ra,Dec,r_k20fe,j_m_k20fe,h_m_k20fe,k_m_k20fe,k_ba,k_pa = np.loadtxt(filename,skiprows=174,dtype={'names':('s0', 's1', 'f2', 'f3','f4','f5','f6','f7','f8','f9'),'formats':('|S15', '|S15',np.float,np.float,np.float,np.float,np.float,np.float,np.float,np.float)} , unpack = True)
     
     
-    RA,DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa,vel,distance = np.loadtxt(filenameCat1,dtype=[('f0',float),('f1',float),('f2',float),('f3',float),('f4',float),('f5',float),('f6',float),('f7',float),('f8',float)], unpack = True)
+    PGC,PA,MAJ_DIAM,MIN_DIAM,RA,DEC = np.loadtxt(filenameCat1,skiprows= 5,usecols = (0,6,7,8,18,19), delimiter = ',',dtype=[('f0',int),('f1',float),('f2',float),('f3',float),('f4',float),('f5',float)], unpack = True)
     
-    '''
+    PGC_Tully,DIST_Q,BA,DIST_MODFGC,LC,DIST_DMG= np.loadtxt(filenameCat2,skiprows= 5,usecols = (0,10,13,29,31,39), delimiter = ',',dtype=[('f0',float),('f1',float),('f2',float),('f3',float),('f4',float),('f5',float)], unpack = True)
+    
+    print(len(PGC))
+    print(len(PGC_Tully))
+    
+    
     newfile = open(outfilename, 'w')
     
     c = 0
+    d = 0
     
     
-    for i in range(len(RA)):
+    for i in range(len(PGC)):
+        for j in range(len(PGC_Tully)):
         
-        # if   Morphology[i] != b'null' and Morphology[i] != b'PN' and Morphology[i] != b'GC' and Morphology[i] != b'SNR' :
-        if   H_mag[i] != 0.0 :
-            #print(str(Name[i]))
-            
-            #name = str(Name[i])
-            #morph = str(Morphology[i])
-            newfile.write(str(RA[i])+" "+str(DEC[i])+" "+str(distance[i])+" "+str(H_mag[i])+"\n")
-    
-        else :
-            c = c+1
- 
+            if j <= len(PGC_Tully):
+                if   PGC[i] == PGC_Tully[j]:
+      
+                    newfile.write(str(PGC[i])+" "+str(RA[i])+" "+str(DEC[i])+" "+str(MAJ_DIAM[i]*60)+" "+str(MIN_DIAM[i])+" "+str(PA[i])+" "+str(DIST_DMG[j])+" "+str(DIST_Q[j])+" "+str(DIST_MODFGC[j])+" "+str(BA[j])+" "+str(LC[j])+"\n")
+            else:
+
+                exit
+
  
 
     print(c)
+    print(d)
+
     newfile.close();
+    
 
-
-
+    '''
     Prova = np.ndarray.tostring(Name)
     Prova2 = Prova.decode()
     str1 = ''.join(Prova2)
@@ -119,7 +126,7 @@ def main():
     print(type(str8))
     
     
-    '''
+    
     
     #M=[Ra,Dec,r_k20fe,j_m_k20fe,h_m_k20fe,k_m_k20fe,k_ba,k_pa]
     M=[RA,DEC,r_k20fe,j_m_k20fe,k_m_k20fe,k_ba,k_pa,vel,distance]
@@ -148,7 +155,7 @@ def main():
     thdulist = pyfits.HDUList([hdu,tbhdu])
     thdulist.writeto(outfilename)
     thdulist.close()
-
+    '''
 
 #------------------------------------------------------------------------------
 # Start program execution.
