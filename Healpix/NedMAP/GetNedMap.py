@@ -66,14 +66,16 @@ def main():
     RA,DEC = np.loadtxt(filenameCat,skiprows= 26,usecols = (2,3), delimiter = '|',dtype=[('f0',float),('f1',float)], unpack = True)
 
 
-    pix = DeclRaToIndex(DEC,RA,64)
+    pix = DeclRaToIndex(DEC,RA,512)
+    galpixels= np.zeros(hp.nside2npix(512))
+    galpixels[pix]=galpixels[pix]+1
     
     print(len(pix))
 
     print(hp.npix2nside(len(pix)))
     #print(hp.nside2npix(64))
     
-    hp.mollview(pix,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob',xsize = 64)
+    hp.mollview(galpixels,coord='C',rot = [0,0.3], title='Histogram equalized Ecliptic', unit='prob',xsize = 64)
     hp.graticule()
     plt.show()
 
